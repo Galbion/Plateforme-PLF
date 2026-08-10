@@ -52,7 +52,7 @@ body{
 }
 .brand{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
 .brand-mark{
-  width:34px;height:34px;border-radius:6px;
+  width:40px;height:40px;border-radius:6px;
   background:rgba(255, 255, 255, 0.45);
   display:flex;align-items:center;justify-content:center;
   flex-shrink:0;
@@ -286,6 +286,22 @@ canvas{max-height:230px;}
           <div class="panel">
             <div class="panel-head"><h2>Répartition des statuts (sites)</h2></div>
             <canvas id="chartStatus" style="max-height:200px"></canvas>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Matrice Stock vs Consommation — délais d'autonomie par région</h2>
+            <div class="hint">Position = stock actuel vs conso. mensuelle · zones = niveau de risque</div>
+          </div>
+          <div style="height:420px;">
+            <canvas id="chartMatrix"></canvas>
+          </div>
+          <div class="legend-row">
+            <div class="legend-item"><span class="legend-dot" style="background:var(--status-critique)"></span>Critique &lt; 1 mois</div>
+            <div class="legend-item"><span class="legend-dot" style="background:var(--status-faible)"></span>Faible 1–3 mois</div>
+            <div class="legend-item"><span class="legend-dot" style="background:var(--status-moyen)"></span>Moyen 3–6 mois</div>
+            <div class="legend-item"><span class="legend-dot" style="background:var(--status-suffisant)"></span>Suffisant &gt; 6 mois</div>
           </div>
         </div>
 
@@ -766,6 +782,109 @@ function renderDashboard(){
     type:'doughnut',
     data:{ labels:['Critique','Faible','Moyen','Suffisant'], datasets:[{ data:[statusCounts.critique,statusCounts.faible,statusCounts.moyen,statusCounts.suffisant], backgroundColor:['#E5484D','#F2994E','#E8C547','#3DAE73'], borderWidth:0 }]},
     options:{ plugins:{legend:{position:'bottom',labels:{color:'#5B6472',font:{size:11},padding:14}}}, cutout:'65%' }
+  });
+
+  // matrice stock vs consommation (scatter avec zones de risque)
+  const ctx4 = document.getElementById('chartMatrix');
+  if(charts.matrix) charts.matrix.destroy();
+  const maxConso = Math.max(...rows.map(r=>r.conso), 10) * 1.15;
+  const maxStock = Math.max(...rows.map(r=>r.stock), 10) * 1.15;
+
+  const matrixZonesPlugin = {
+    id:'matrixZones',
+    beforeDatasetsDraw(chart){
+      const {ctx, chartArea, scales} = chart;
+      if(!chartArea) return;
+      const xScale = scales.x, yScale = scales.y;
+      const xMax = xScale.max, yMax = yScale.max;
+      const steps = 48;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(chartArea.left, chartArea.top, chartArea.width, chartArea.height);
+      ctx.clip();
+      const bands = [
+        {lo:0, hi:1, color:'rgba(229,72,77,0.14)'},
+        {lo:1, hi:3, color:'rgba(242,153,78,0.14)'},
+        {lo:3, hi:6, color:'rgba(232,197,71,0.16)'},
+        {lo:6, hi:Infinity, color:'rgba(61,174,115,0.14)'}
+      ];
+      bands.forEach(b=>{
+        ctx.beginPath();
+        for(let i=0;i<=steps;i++){
+          const xv = xMax*i/steps;
+          const yv = Math.min(b.lo*xv, yMax);
+          const px = xScale.getPixelForValue(xv), py = yScale.getPixelForValue(yv);
+          i===0 ? ctx.moveTo(px,py) : ctx.lineTo(px,py);
+        }
+        for(let i=steps;i>=0;i--){
+          const xv = xMax*i/steps;
+          const yv = b.hi===Infinity ? yMax : Math.min(b.hi*xv, yMax);
+          const px = xScale.getPixelForValue(xv), py = yScale.getPixelForValue(yv);
+          ctx.lineTo(px,py);
+        }
+        ctx.closePath();
+        ctx.fillStyle = b.color;
+        ctx.fill();
+      });
+      [1,3,6].forEach(k=>{
+        ctx.beginPath();
+        for(let i=0;i<=steps;i++){
+          const xv = xMax*i/steps;
+          const yv = Math.min(k*xv, yMax);
+          const px = xScale.getPixelForValue(xv), py = yScale.getPixelForValue(yv);
+          i===0 ? ctx.moveTo(px,py) : ctx.lineTo(px,py);
+        }
+        ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      });
+      ctx.restore();
+    }
+  };
+
+  const matrixLabelsPlugin = {
+    id:'matrixLabels',
+    afterDatasetsDraw(chart){
+      const {ctx} = chart;
+      const meta = chart.getDatasetMeta(0);
+      const data = chart.data.datasets[0].data;
+      ctx.save();
+      ctx.font = "700 10.5px Inter, sans-serif";
+      ctx.textBaseline = 'middle';
+      meta.data.forEach((point,i)=>{
+        const d = data[i];
+        ctx.fillStyle = '#fff';
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = d.color;
+        ctx.strokeText(d.code, point.x + 10, point.y);
+        ctx.fillStyle = d.color;
+        ctx.fillText(d.code, point.x + 10, point.y);
+      });
+      ctx.restore();
+    }
+  };
+
+  charts.matrix = new Chart(ctx4, {
+    type:'scatter',
+    data:{ datasets:[{
+      label:'Sites',
+      data: rows.map(r=>({x:r.conso, y:r.stock, code:r.code, color:statusColor[r.statut], couverture:r.couverture})),
+      backgroundColor: rows.map(r=>statusColor[r.statut]),
+      borderColor:'#fff', borderWidth:2,
+      pointRadius:7, pointHoverRadius:9
+    }]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      scales:{
+        x:{ min:0, max:maxConso, title:{display:true,text:'Consommation mensuelle (cartouches)',color:'#5B6472',font:{size:11}}, ticks:{color:'#5B6472',font:{size:10}}, grid:{color:'#E4E7EC'} },
+        y:{ min:0, max:maxStock, title:{display:true,text:'Stock actuel (cartouches)',color:'#5B6472',font:{size:11}}, ticks:{color:'#5B6472',font:{size:10}}, grid:{color:'#E4E7EC'} }
+      },
+      plugins:{
+        legend:{display:false},
+        tooltip:{ callbacks:{ label:(c)=>`${c.raw.code} — stock ${c.raw.y.toLocaleString('fr-FR')}, conso ${c.raw.x}/mois, couverture ${c.raw.couverture>=999?'∞':c.raw.couverture.toFixed(1)}m` } }
+      }
+    },
+    plugins:[matrixZonesPlugin, matrixLabelsPlugin]
   });
 
   // alerts

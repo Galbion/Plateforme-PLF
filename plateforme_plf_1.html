@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SENTINEL PLF — Suivi Cartouches &amp; Pistolets Lance-Fusées</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg-deep:#F5F6F8;
+  --bg-panel:#FFFFFF;
+  --bg-panel-raised:#F1F3F6;
+  --line:#E4E7EC;
+  --line-soft:#EDEFF3;
+  --text-hi:#1A1F26;
+  --text-mid:#5B6472;
+  --text-dim:#9AA4B2;
+  --accent-flare:#FF6B1A;
+  --accent-flare-glow:#FF8A3D;
+  --status-critique:#E5484D;
+  --status-faible:#F2994E;
+  --status-moyen:#D9A400;
+  --status-suffisant:#2E9E5B;
+  --color-entree:#219653;
+  --color-entree-dark:#1A7A43;
+  --color-sortie:#2775E0;
+  --color-sortie-dark:#1E5FBD;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  background:var(--bg-deep);
+  color:var(--text-hi);
+  font-family:'Inter',sans-serif;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:rgba(255,107,26,0.18);}
+.mono{font-family:'JetBrains Mono',monospace;}
+.disp{font-family:'Big Shoulders Display',sans-serif;text-transform:uppercase;}
+
+/* layout */
+.app{display:flex;min-height:100vh;}
+.sidebar{
+  width:230px;flex-shrink:0;background:var(--bg-panel);
+  border-right:1px solid var(--line);
+  display:flex;flex-direction:column;
+  padding:26px 18px;
+  position:sticky;top:0;height:100vh;
+  box-shadow:2px 0 12px rgba(20,25,35,0.03);
+}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.brand-mark{
+  width:34px;height:34px;border-radius:6px;
+  background:rgba(255, 255, 255, 0.45);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.brand-mark svg{width:18px;height:18px;}
+.brand-name{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:17px;letter-spacing:0.3px;line-height:1.05;}
+.brand-sub{font-size:10.5px;color:var(--text-dim);letter-spacing:1.2px;text-transform:uppercase;margin-top:2px;}
+.nav{margin-top:34px;display:flex;flex-direction:column;gap:4px;}
+.nav-label{font-size:10px;letter-spacing:1.6px;color:var(--text-dim);text-transform:uppercase;margin:14px 10px 8px;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:8px;
+  color:var(--text-mid);font-size:13.5px;font-weight:500;
+  cursor:pointer;border:1px solid transparent;
+  transition:background .15s,color .15s,border-color .15s;
+}
+.nav-item:hover{background:var(--bg-panel-raised);color:var(--text-hi);}
+.nav-item.active{
+  background:rgba(255,107,26,0.10);
+  color:var(--accent-flare-glow);
+  border-color:rgba(255,107,26,0.35);
+}
+.nav-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.sidebar-foot{margin-top:auto;padding-top:16px;border-top:1px solid var(--line);}
+.sidebar-foot .clock{font-size:11px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;}
+
+.main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{
+  height:66px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;background:rgba(255,255,255,0.75);backdrop-filter:blur(6px);
+  position:sticky;top:0;z-index:20;
+}
+.topbar h1{font-family:'Big Shoulders Display',sans-serif;font-size:22px;font-weight:700;letter-spacing:.3px;}
+.topbar .sub{font-size:12px;color:var(--text-dim);margin-top:1px;}
+.region-select{
+  background:var(--bg-panel-raised);border:1px solid var(--line);color:var(--text-hi);
+  padding:9px 14px;border-radius:8px;font-size:13px;font-weight:500;font-family:'Inter',sans-serif;
+  cursor:pointer;min-width:230px;
+}
+.content{padding:26px 28px 60px;max-width:1400px;width:100%;margin:0 auto;}
+.page{display:none;}
+.page.active{display:block;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+/* KPI cards */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px;}
+.kpi{
+  background:var(--bg-panel);border:1px solid var(--line);border-radius:12px;
+  padding:16px 18px;position:relative;overflow:hidden;
+  box-shadow:0 1px 3px rgba(20,25,35,0.04);
+}
+.kpi .val{font-family:'Big Shoulders Display',sans-serif;font-size:32px;font-weight:800;line-height:1;}
+.kpi .lbl{font-size:11px;color:var(--text-mid);margin-top:8px;letter-spacing:.3px;}
+.kpi .bar{position:absolute;left:0;top:0;bottom:0;width:3px;}
+
+/* panels */
+.panel{background:var(--bg-panel);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:20px;box-shadow:0 1px 3px rgba(20,25,35,0.04);}
+.panel.entree{border-top:3px solid var(--color-entree);}
+.panel.entree .panel-head h2{color:var(--color-entree-dark);}
+.panel.sortie{border-top:3px solid var(--color-sortie);}
+.panel.sortie .panel-head h2{color:var(--color-sortie-dark);}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.panel-head h2{font-family:'Big Shoulders Display',sans-serif;font-size:17px;font-weight:700;letter-spacing:.2px;}
+.panel-head .hint{font-size:11.5px;color:var(--text-dim);}
+.grid-2{display:grid;grid-template-columns:1.3fr 1fr;gap:20px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+
+/* flare gauges (signature element) */
+.flare-rack{display:flex;align-items:flex-end;gap:10px;height:180px;padding:10px 4px 0;overflow-x:auto;}
+.flare-col{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:44px;height:100%;justify-content:flex-end;}
+.flare-tube{width:14px;height:140px;background:linear-gradient(#EDEFF3,#E4E7EC);border:1px solid var(--line);border-radius:7px;display:flex;align-items:flex-end;overflow:hidden;position:relative;}
+.flare-fill{width:100%;border-radius:6px;transition:height .5s ease;}
+.flare-code{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--text-mid);margin-top:8px;letter-spacing:.5px;}
+.flare-val{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-dim);}
+
+/* status chip */
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;font-size:11.5px;font-weight:600;white-space:nowrap;}
+.chip::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;}
+.chip.critique{background:rgba(229,72,77,0.14);color:var(--status-critique);}
+.chip.faible{background:rgba(242,153,78,0.14);color:var(--status-faible);}
+.chip.moyen{background:rgba(232,197,71,0.14);color:var(--status-moyen);}
+.chip.suffisant{background:rgba(61,174,115,0.14);color:var(--status-suffisant);}
+.chip.fonctionnel{background:rgba(61,174,115,0.14);color:var(--status-suffisant);}
+.chip.panne{background:rgba(229,72,77,0.14);color:var(--status-critique);}
+.chip.maintenance{background:rgba(232,197,71,0.14);color:var(--status-moyen);}
+.chip.reforme{background:rgba(154,164,178,0.14);color:var(--text-mid);}
+
+/* table */
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{
+  text-align:left;font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;
+  color:var(--text-dim);padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer;user-select:none;
+}
+th:hover{color:var(--text-mid);}
+td{padding:11px 12px;border-bottom:1px solid var(--line-soft);color:var(--text-hi);}
+tr.alert-row td{background:rgba(229,72,77,0.05);}
+tbody tr:hover td{background:var(--bg-panel-raised);}
+.num{font-family:'JetBrains Mono',monospace;text-align:right;}
+
+/* forms */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;}
+label{font-size:11px;color:var(--text-mid);display:block;margin-bottom:6px;letter-spacing:.2px;}
+input,select,textarea{
+  width:100%;background:var(--bg-panel-raised);border:1px solid var(--line);color:var(--text-hi);
+  padding:9px 11px;border-radius:7px;font-size:13px;font-family:'Inter',sans-serif;
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent-flare);}
+.field{margin-bottom:0;}
+.btn{
+  background:linear-gradient(160deg,var(--accent-flare),#e85e12);color:#fff;border:none;
+  padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;
+  box-shadow:0 4px 14px rgba(255,107,26,0.25);transition:transform .12s,box-shadow .12s;
+}
+.btn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(255,107,26,0.35);}
+.btn.secondary{background:var(--bg-panel-raised);border:1px solid var(--line);box-shadow:none;color:var(--text-hi);}
+.btn.small{padding:6px 12px;font-size:12px;}
+.btn.danger{background:rgba(229,72,77,0.14);color:var(--status-critique);box-shadow:none;border:1px solid rgba(229,72,77,0.3);}
+.btn.entree{background:linear-gradient(160deg,var(--color-entree),var(--color-entree-dark));box-shadow:0 4px 14px rgba(33,150,83,0.25);}
+.btn.entree:hover{box-shadow:0 6px 18px rgba(33,150,83,0.35);}
+.btn.sortie{background:linear-gradient(160deg,var(--color-sortie),var(--color-sortie-dark));box-shadow:0 4px 14px rgba(39,117,224,0.25);}
+.btn.sortie:hover{box-shadow:0 6px 18px rgba(39,117,224,0.35);}
+
+.tabs{display:flex;gap:6px;margin-bottom:18px;border-bottom:1px solid var(--line);}
+.tab{padding:10px 4px;margin-right:20px;font-size:13.5px;color:var(--text-mid);cursor:pointer;border-bottom:2px solid transparent;font-weight:500;}
+.tab.active{color:var(--text-hi);border-color:var(--accent-flare);}
+
+.two-col-form{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+.empty-state{text-align:center;padding:36px 20px;color:var(--text-dim);}
+.empty-state .big{font-family:'Big Shoulders Display',sans-serif;font-size:15px;color:var(--text-mid);margin-bottom:4px;}
+.toast{
+  position:fixed;bottom:24px;right:24px;background:#FFFFFF;border:1px solid var(--accent-flare);
+  color:var(--text-hi);padding:12px 18px;border-radius:9px;font-size:13px;box-shadow:0 8px 24px rgba(20,25,35,.15);
+  display:flex;align-items:center;gap:10px;z-index:100;transform:translateY(20px);opacity:0;transition:all .3s;pointer-events:none;
+}
+.toast.show{transform:translateY(0);opacity:1;}
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+canvas{max-height:230px;}
+.legend-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-mid);}
+.legend-dot{width:8px;height:8px;border-radius:2px;}
+.alert-list{display:flex;flex-direction:column;gap:8px;}
+.alert-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg-panel-raised);border:1px solid var(--line);border-radius:8px;}
+.alert-item .desc{font-size:12.5px;color:var(--text-mid);}
+.alert-item .who{font-size:13px;font-weight:600;}
+.subtable-actions{display:flex;gap:6px;}
+.section-title{font-size:11px;color:var(--text-dim);letter-spacing:1.2px;text-transform:uppercase;margin:22px 0 10px;}
+.pill-count{background:var(--bg-panel-raised);border:1px solid var(--line);border-radius:20px;padding:2px 9px;font-size:11px;color:var(--text-mid);margin-left:8px;}
+@media(max-width:1100px){.kpi-row{grid-template-columns:repeat(2,1fr);}.grid-2,.charts-row,.two-col-form{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <div class="brand-mark">
+          <div class="brand-mark">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/e/ef/Sonatrach.svg?utm_source=fr.wikipedia.org&utm_campaign=index&utm_content=original" alt="Logo" style="width:100%;height:100%;object-fit:contain;">
+</div>
+</div>
+      </div>
+      <div>
+        <div class="brand-name">SONATRACH</div>
+        <div class="brand-sub">Division Production</div>
+        <div class="brand-sub">Plateforme PLF</div>
+
+      </div>
+    </div>
+    <div class="nav">
+      <div class="nav-label">Vue</div>
+      <div class="nav-item active" data-page="dashboard"><span class="nav-dot"></span>Tableau de bord — Direction</div>
+      <div class="nav-item" data-page="region"><span class="nav-dot"></span>Saisie — Espace Région</div>
+      <div class="nav-label">Registres</div>
+      <div class="nav-item" data-page="cartouches"><span class="nav-dot"></span>Cartouches — vue globale</div>
+      <div class="nav-item" data-page="pistolets"><span class="nav-dot"></span>Pistolets — vue globale</div>
+    </div>
+    <div class="sidebar-foot">
+      <div class="clock" id="clock">--</div>
+      <div style="font-size:10.5px;color:var(--text-dim);margin-top:4px;">13 sites · Données partagées en temps réel</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="pageTitle">Tableau de bord Direction </h1>
+        <div class="sub" id="pageSub">Vue consolidée du stock de cartouches et de l'état du parc de pistolets PLF</div>
+      </div>
+      <div id="topbarRight"></div>
+    </div>
+    <div class="content">
+
+      <!-- ============ DASHBOARD ============ -->
+      <div class="page active" id="page-dashboard">
+        <div class="kpi-row" id="kpiRow"></div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Couverture par site — rampe de signalisation</h2>
+            <div class="hint">Hauteur = autonomie en mois (cartouches)</div>
+          </div>
+          <div class="flare-rack" id="flareRack"></div>
+          <div class="legend-row">
+            <div class="legend-item"><span class="legend-dot" style="background:var(--status-critique)"></span>Critique &lt; 1 mois</div>
+            <div class="legend-item"><span class="legend-dot" style="background:var(--status-faible)"></span>Faible 1–3 mois</div>
+            <div class="legend-item"><span class="legend-dot" style="background:var(--status-moyen)"></span>Moyen 3–6 mois</div>
+            <div class="legend-item"><span class="legend-dot" style="background:var(--status-suffisant)"></span>Suffisant &gt; 6 mois</div>
+          </div>
+        </div>
+
+        <div class="charts-row">
+          <div class="panel">
+            <div class="panel-head"><h2>Stock actuel de cartouches par site</h2></div>
+            <canvas id="chartStock"></canvas>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h2>État du parc de pistolets</h2></div>
+            <canvas id="chartPistolets"></canvas>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-head">
+              <h2>Alertes actives</h2>
+              <div class="hint" id="alertCount"></div>
+            </div>
+            <div class="alert-list" id="alertList"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h2>Répartition des statuts (sites)</h2></div>
+            <canvas id="chartStatus" style="max-height:200px"></canvas>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Synthèse par région</h2>
+            <div class="hint">Cliquer un en-tête pour trier</div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table id="masterTable">
+              <thead>
+                <tr>
+                  <th data-k="region">Région</th>
+                  <th data-k="stock" class="num">Stock cartouches</th>
+                  <th data-k="conso" class="num">Conso. / mois</th>
+                  <th data-k="couverture" class="num">Couverture</th>
+                  <th data-k="statut">Statut</th>
+                  <th data-k="pisto" class="num">Pistolets</th>
+                  <th data-k="pistoOk" class="num">Fonctionnels</th>
+                  <th data-k="pistoKo" class="num">En panne</th>
+                  <th data-k="maj">Dernière MAJ</th>
+                </tr>
+              </thead>
+              <tbody id="masterTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ REGION DATA ENTRY ============ -->
+      <div class="page" id="page-region">
+        <div class="panel" style="margin-bottom:18px;">
+          <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+            <div class="field">
+              <label>Site / Région</label>
+              <select id="regionSelect"></select>
+            </div>
+            <div class="field">
+              <label>Responsable du site</label>
+              <input type="text" id="responsableSite" placeholder="Nom du responsable">
+            </div>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <div class="tab active" data-tab="tab-cart">Cartouches PLF</div>
+          <div class="tab" data-tab="tab-pist">Pistolets lance-fusées</div>
+        </div>
+
+        <div id="tab-cart">
+          <div class="grid-3" style="margin-bottom:18px;">
+            <div class="kpi"><div class="bar" style="background:var(--accent-flare)"></div><div class="val" id="rStock">–</div><div class="lbl">Stock actuel</div></div>
+            <div class="kpi"><div class="bar" style="background:var(--status-moyen)"></div><div class="val" id="rCouverture">–</div><div class="lbl">Couverture (mois)</div></div>
+            <div class="kpi"><div class="bar" style="background:var(--status-suffisant)"></div><div class="val" id="rStatut">–</div><div class="lbl">Statut</div></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h2>Consommation mensuelle estimée</h2><div class="hint">Sert au calcul de couverture</div></div>
+            <div class="form-grid" style="grid-template-columns:220px auto;align-items:end;">
+              <div class="field"><label>Cartouches / mois</label><input type="number" id="consoInput" min="0"></div>
+              <button class="btn secondary" id="saveConso">Mettre à jour</button>
+            </div>
+          </div>
+
+          <div class="two-col-form">
+            <div class="panel entree">
+              <div class="panel-head"><h2>Nouvelle entrée</h2></div>
+              <div class="form-grid">
+                <div class="field"><label>Date</label><input type="date" id="eDate"></div>
+                <div class="field"><label>Quantité</label><input type="number" id="eQty" min="1"></div>
+                <div class="field"><label>N° Bon / Référence</label><input type="text" id="eRef"></div>
+                <div class="field"><label>Fournisseur / Provenance</label><input type="text" id="eProv"></div>
+                <div class="field"><label>Responsable</label><input type="text" id="eResp"></div>
+                <div class="field" style="grid-column:1/-1;"><label>Observations</label><input type="text" id="eObs"></div>
+              </div>
+              <div style="margin-top:14px;"><button class="btn entree" id="addEntree">Enregistrer l'entrée</button></div>
+            </div>
+            <div class="panel sortie">
+              <div class="panel-head"><h2>Nouvelle sortie</h2></div>
+              <div class="form-grid">
+                <div class="field"><label>Date</label><input type="date" id="sDate"></div>
+                <div class="field"><label>Quantité</label><input type="number" id="sQty" min="1"></div>
+                <div class="field"><label>N° Bon / Référence</label><input type="text" id="sRef"></div>
+                <div class="field"><label>Destinataire / Motif</label><input type="text" id="sDest"></div>
+                <div class="field"><label>Responsable</label><input type="text" id="sResp"></div>
+                <div class="field" style="grid-column:1/-1;"><label>Observations</label><input type="text" id="sObs"></div>
+              </div>
+              <div style="margin-top:14px;"><button class="btn sortie" id="addSortie">Enregistrer la sortie</button></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h2>Historique du site</h2></div>
+            <div style="overflow-x:auto;">
+              <table>
+                <thead><tr><th>Date</th><th>Mouvement</th><th class="num">Quantité</th><th>Référence</th><th>Provenance / Destinataire</th><th>Responsable</th><th>Observations</th></tr></thead>
+                <tbody id="historyBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-pist" style="display:none;">
+          <div class="panel">
+            <div class="panel-head"><h2>Ajouter un pistolet lance-fusées</h2></div>
+            <div class="form-grid">
+              <div class="field"><label>N° de série</label><input type="text" id="pSerie" placeholder="Ex: PLF-2024-018"></div>
+              <div class="field"><label>Marque / Modèle</label><input type="text" id="pModele" placeholder="Ex: Cerbérus 2000"></div>
+              <div class="field"><label>État</label>
+                <select id="pEtat">
+                  <option value="fonctionnel">Fonctionnel</option>
+                  <option value="maintenance">En maintenance</option>
+                  <option value="panne">En panne</option>
+                  <option value="reforme">Réformé</option>
+                </select>
+              </div>
+              <div class="field"><label>Dernier contrôle</label><input type="date" id="pDernier"></div>
+              <div class="field"><label>Prochain contrôle</label><input type="date" id="pProchain"></div>
+              <div class="field"><label>Responsable</label><input type="text" id="pResp"></div>
+              <div class="field" style="grid-column:1/-1;"><label>Observations</label><input type="text" id="pObs"></div>
+            </div>
+            <div style="margin-top:14px;"><button class="btn" id="addPistolet">Ajouter le pistolet</button></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h2>Parc de pistolets du site</h2><div class="hint" id="pistoCountHint"></div></div>
+            <div style="overflow-x:auto;">
+              <table>
+                <thead><tr><th>N° Série</th><th>Modèle</th><th>État</th><th>Dernier contrôle</th><th>Prochain contrôle</th><th>Responsable</th><th>Observations</th><th></th></tr></thead>
+                <tbody id="pistoletBody"></tbody>
+              </table>
+            </div>
+            <div class="empty-state" id="pistoEmpty" style="display:none;">
+              <div class="big">Aucun pistolet enregistré pour ce site</div>
+              <div>Ajoutez le premier pistolet du parc ci-dessus.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ GLOBAL CARTOUCHES ============ -->
+      <div class="page" id="page-cartouches">
+        <div class="panel">
+          <div class="panel-head"><h2>Registre consolidé — Cartouches PLF</h2></div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>Région</th><th class="num">Stock initial</th><th class="num">Entrées</th><th class="num">Sorties</th><th class="num">Stock actuel</th><th class="num">Conso./mois</th><th class="num">Couverture</th><th>Statut</th></tr></thead>
+              <tbody id="cartGlobalBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ GLOBAL PISTOLETS ============ -->
+      <div class="page" id="page-pistolets">
+        <div class="kpi-row" id="pistoKpiRow" style="grid-template-columns:repeat(4,1fr);"></div>
+        <div class="panel">
+          <div class="panel-head"><h2>Registre consolidé — Pistolets lance-fusées</h2></div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>Région</th><th>N° Série</th><th>Modèle</th><th>État</th><th>Dernier contrôle</th><th>Prochain contrôle</th><th>Responsable</th><th>Observations</th></tr></thead>
+              <tbody id="pistoGlobalBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ DATA MODEL & SEED ============ */
+const REGIONS = ["STAH","RNS","HAMRA","OHANET","TFT","HRM","REB","HMD","ADRAR","GTL","HBK","ONR","INAS"];
+
+const SEED = {
+  STAH:  {stockInitial:10,   conso:360, entrees:[], sorties:[]},
+  RNS:   {stockInitial:150,  conso:250, entrees:[], sorties:[]},
+  HAMRA: {stockInitial:110,  conso:90,  entrees:[], sorties:[]},
+  OHANET:{stockInitial:172,  conso:110, entrees:[], sorties:[]},
+  TFT:   {stockInitial:344,  conso:200, entrees:[], sorties:[]},
+  HRM:   {stockInitial:770,  conso:382, entrees:[], sorties:[]},
+  REB:   {stockInitial:270,  conso:50,  entrees:[], sorties:[]},
+  HMD:   {stockInitial:1240, conso:120, entrees:[], sorties:[]},
+  ADRAR: {stockInitial:1226, conso:100, entrees:[{date:"2026-01-15",qty:100,ref:"",prov:"Dépôt central",resp:"",obs:""}], sorties:[{date:"2026-02-02",qty:20,ref:"",dest:"Exercice sécurité",resp:"",obs:""}]},
+  GTL:   {stockInitial:1600, conso:65,  entrees:[], sorties:[]},
+  HBK:   {stockInitial:950,  conso:36,  entrees:[], sorties:[]},
+  ONR:   {stockInitial:700,  conso:20,  entrees:[], sorties:[]},
+  INAS:  {stockInitial:1000, conso:20,  entrees:[], sorties:[]},
+};
+
+let STATE = {};   // { CODE: { cartouches:{stockInitial,conso,entrees,sorties}, pistolets:[...], responsableSite, lastUpdate } }
+let currentRegion = REGIONS[0];
+let charts = {};
+
+function uid(){ return Math.random().toString(36).slice(2,9); }
+
+function statusOf(couverture){
+  if(couverture < 1) return "critique";
+  if(couverture < 3) return "faible";
+  if(couverture < 6) return "moyen";
+  return "suffisant";
+}
+const statusLabel = {critique:"Critique (< 1 mois)",faible:"Faible (1-3 mois)",moyen:"Moyen (3-6 mois)",suffisant:"Suffisant (> 6 mois)"};
+const etatLabel = {fonctionnel:"Fonctionnel",panne:"En panne",maintenance:"En maintenance",reforme:"Réformé"};
+const etatClass = {fonctionnel:"fonctionnel",panne:"panne",maintenance:"maintenance",reforme:"reforme"};
+
+function computeCart(c){
+  const entreesQty = c.entrees.reduce((s,e)=>s+Number(e.qty||0),0);
+  const sortiesQty = c.sorties.reduce((s,e)=>s+Number(e.qty||0),0);
+  const stock = c.stockInitial + entreesQty - sortiesQty;
+  const couverture = c.conso > 0 ? stock / c.conso : (stock>0?999:0);
+  return {stock, entreesQty, sortiesQty, couverture, statut: statusOf(couverture)};
+}
+
+async function loadRegion(code){
+  try{
+    const res = await window.storage.get('region-data:'+code, true);
+    if(res && res.value){
+      STATE[code] = JSON.parse(res.value);
+      return STATE[code];
+    }
+  }catch(e){ /* not found, fall through to seed */ }
+  const seed = SEED[code];
+  const data = {
+    cartouches:{ stockInitial:seed.stockInitial, conso:seed.conso, entrees:seed.entrees.map(x=>({...x,id:uid()})), sorties:seed.sorties.map(x=>({...x,id:uid()})) },
+    pistolets: [],
+    responsableSite: "",
+    lastUpdate: null
+  };
+  STATE[code] = data;
+  try{ await window.storage.set('region-data:'+code, JSON.stringify(data), true); }catch(e){}
+  return data;
+}
+
+async function saveRegion(code){
+  STATE[code].lastUpdate = new Date().toISOString();
+  try{
+    await window.storage.set('region-data:'+code, JSON.stringify(STATE[code]), true);
+  }catch(e){ showToast("Erreur de sauvegarde — réessayez"); return false; }
+  return true;
+}
+
+async function loadAll(){
+  await Promise.all(REGIONS.map(c=>loadRegion(c)));
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* ============ NAV ============ */
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click', ()=>{
+    document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+    item.classList.add('active');
+    const page = item.dataset.page;
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('page-'+page).classList.add('active');
+    const titles = {
+      dashboard:["Tableau de bord Direction","Vue consolidée du stock de cartouches et de l'état du parc de pistolets PLF"],
+      region:["Espace Région — Saisie","Renseignez les mouvements de cartouches et l'état du parc de pistolets de votre site"],
+      cartouches:["Registre global — Cartouches","Vue consolidée de tous les sites"],
+      pistolets:["Registre global — Pistolets","Vue consolidée du parc de pistolets lance-fusées"]
+    };
+    document.getElementById('pageTitle').textContent = titles[page][0];
+    document.getElementById('pageSub').textContent = titles[page][1];
+    if(page==='dashboard') renderDashboard();
+    if(page==='cartouches') renderCartGlobal();
+    if(page==='pistolets') renderPistoGlobal();
+  });
+});
+
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-cart').style.display = tab.dataset.tab==='tab-cart' ? 'block':'none';
+    document.getElementById('tab-pist').style.display = tab.dataset.tab==='tab-pist' ? 'block':'none';
+  });
+});
+
+/* ============ REGION PAGE ============ */
+const regionSelect = document.getElementById('regionSelect');
+REGIONS.forEach(r=>{
+  const opt = document.createElement('option');
+  opt.value = r; opt.textContent = r;
+  regionSelect.appendChild(opt);
+});
+regionSelect.addEventListener('change', ()=>{
+  currentRegion = regionSelect.value;
+  renderRegionPage();
+});
+document.getElementById('responsableSite').addEventListener('change', async (e)=>{
+  STATE[currentRegion].responsableSite = e.target.value;
+  await saveRegion(currentRegion);
+  showToast("Responsable mis à jour");
+});
+
+function renderRegionPage(){
+  const data = STATE[currentRegion];
+  document.getElementById('responsableSite').value = data.responsableSite || "";
+  document.getElementById('consoInput').value = data.cartouches.conso;
+  const c = computeCart(data.cartouches);
+  document.getElementById('rStock').textContent = c.stock;
+  document.getElementById('rCouverture').textContent = c.couverture>=999 ? "∞" : c.couverture.toFixed(1);
+  const statutEl = document.getElementById('rStatut');
+  statutEl.innerHTML = '<span class="chip '+c.statut+'">'+statusLabel[c.statut].split(' (')[0]+'</span>';
+
+  // history
+  const rows = [];
+  data.cartouches.entrees.forEach(e=>rows.push({...e,type:'Entrée'}));
+  data.cartouches.sorties.forEach(e=>rows.push({...e,type:'Sortie'}));
+  rows.sort((a,b)=> (b.date||'').localeCompare(a.date||''));
+  const hb = document.getElementById('historyBody');
+  hb.innerHTML = rows.length ? rows.map(r=>`
+    <tr>
+      <td class="mono">${r.date||'—'}</td>
+      <td><span class="chip ${r.type==='Entrée'?'suffisant':'faible'}">${r.type}</span></td>
+      <td class="num mono">${r.type==='Entrée'?'+':'-'}${r.qty}</td>
+      <td>${r.ref||'—'}</td>
+      <td>${r.prov||r.dest||'—'}</td>
+      <td>${r.resp||'—'}</td>
+      <td>${r.obs||'—'}</td>
+    </tr>`).join('') : `<tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:24px;">Aucun mouvement enregistré pour ce site.</td></tr>`;
+
+  renderPistoletTable();
+}
+
+document.getElementById('saveConso').addEventListener('click', async ()=>{
+  const val = Number(document.getElementById('consoInput').value)||0;
+  STATE[currentRegion].cartouches.conso = val;
+  await saveRegion(currentRegion);
+  showToast("Consommation mensuelle mise à jour");
+  renderRegionPage();
+});
+
+document.getElementById('addEntree').addEventListener('click', async ()=>{
+  const qty = Number(document.getElementById('eQty').value);
+  if(!qty || qty<=0){ showToast("Indiquez une quantité valide"); return; }
+  STATE[currentRegion].cartouches.entrees.push({
+    id:uid(), date:document.getElementById('eDate').value || new Date().toISOString().slice(0,10),
+    qty, ref:document.getElementById('eRef').value, prov:document.getElementById('eProv').value,
+    resp:document.getElementById('eResp').value, obs:document.getElementById('eObs').value
+  });
+  await saveRegion(currentRegion);
+  ['eDate','eQty','eRef','eProv','eResp','eObs'].forEach(id=>document.getElementById(id).value='');
+  showToast("Entrée enregistrée");
+  renderRegionPage();
+});
+
+document.getElementById('addSortie').addEventListener('click', async ()=>{
+  const qty = Number(document.getElementById('sQty').value);
+  if(!qty || qty<=0){ showToast("Indiquez une quantité valide"); return; }
+  STATE[currentRegion].cartouches.sorties.push({
+    id:uid(), date:document.getElementById('sDate').value || new Date().toISOString().slice(0,10),
+    qty, ref:document.getElementById('sRef').value, dest:document.getElementById('sDest').value,
+    resp:document.getElementById('sResp').value, obs:document.getElementById('sObs').value
+  });
+  await saveRegion(currentRegion);
+  ['sDate','sQty','sRef','sDest','sResp','sObs'].forEach(id=>document.getElementById(id).value='');
+  showToast("Sortie enregistrée");
+  renderRegionPage();
+});
+
+function renderPistoletTable(){
+  const list = STATE[currentRegion].pistolets;
+  const body = document.getElementById('pistoletBody');
+  document.getElementById('pistoCountHint').textContent = list.length + ' pistolet(s) au total';
+  document.getElementById('pistoEmpty').style.display = list.length ? 'none':'block';
+  body.innerHTML = list.map(p=>`
+    <tr>
+      <td class="mono">${p.serie}</td>
+      <td>${p.modele||'—'}</td>
+      <td><span class="chip ${etatClass[p.etat]}">${etatLabel[p.etat]}</span></td>
+      <td class="mono">${p.dernier||'—'}</td>
+      <td class="mono">${p.prochain||'—'}</td>
+      <td>${p.resp||'—'}</td>
+      <td>${p.obs||'—'}</td>
+      <td><button class="btn danger small" data-id="${p.id}">Retirer</button></td>
+    </tr>`).join('');
+  body.querySelectorAll('button[data-id]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      STATE[currentRegion].pistolets = STATE[currentRegion].pistolets.filter(p=>p.id!==btn.dataset.id);
+      await saveRegion(currentRegion);
+      showToast("Pistolet retiré");
+      renderPistoletTable();
+    });
+  });
+}
+
+document.getElementById('addPistolet').addEventListener('click', async ()=>{
+  const serie = document.getElementById('pSerie').value.trim();
+  if(!serie){ showToast("Le n° de série est requis"); return; }
+  STATE[currentRegion].pistolets.push({
+    id:uid(), serie, modele:document.getElementById('pModele').value,
+    etat:document.getElementById('pEtat').value, dernier:document.getElementById('pDernier').value,
+    prochain:document.getElementById('pProchain').value, resp:document.getElementById('pResp').value,
+    obs:document.getElementById('pObs').value
+  });
+  await saveRegion(currentRegion);
+  ['pSerie','pModele','pDernier','pProchain','pResp','pObs'].forEach(id=>document.getElementById(id).value='');
+  showToast("Pistolet ajouté au parc");
+  renderPistoletTable();
+});
+
+/* ============ DASHBOARD ============ */
+function allComputed(){
+  return REGIONS.map(code=>{
+    const d = STATE[code];
+    const c = computeCart(d.cartouches);
+    const pistos = d.pistolets;
+    const pistoOk = pistos.filter(p=>p.etat==='fonctionnel').length;
+    const pistoKo = pistos.filter(p=>p.etat==='panne').length;
+    const pistoMaint = pistos.filter(p=>p.etat==='maintenance').length;
+    return {code, ...c, pistoTotal:pistos.length, pistoOk, pistoKo, pistoMaint, responsable:d.responsableSite, lastUpdate:d.lastUpdate};
+  });
+}
+
+const statusColor = {critique:"#E5484D",faible:"#F2994E",moyen:"#E8C547",suffisant:"#3DAE73"};
+
+function renderDashboard(){
+  const rows = allComputed();
+  const stockTotal = rows.reduce((s,r)=>s+r.stock,0);
+  const pistoTotal = rows.reduce((s,r)=>s+r.pistoTotal,0);
+  const pistoOk = rows.reduce((s,r)=>s+r.pistoOk,0);
+  const pistoKo = rows.reduce((s,r)=>s+r.pistoKo,0);
+  const critiques = rows.filter(r=>r.statut==='critique').length;
+
+  document.getElementById('kpiRow').innerHTML = `
+    <div class="kpi"><div class="bar" style="background:var(--accent-flare)"></div><div class="val">${REGIONS.length}</div><div class="lbl">Sites suivis</div></div>
+    <div class="kpi"><div class="bar" style="background:var(--status-suffisant)"></div><div class="val">${stockTotal.toLocaleString('fr-FR')}</div><div class="lbl">Cartouches en stock</div></div>
+    <div class="kpi"><div class="bar" style="background:var(--status-critique)"></div><div class="val">${critiques}</div><div class="lbl">Sites en stock critique</div></div>
+    <div class="kpi"><div class="bar" style="background:var(--accent-flare-glow)"></div><div class="val">${pistoTotal}</div><div class="lbl">Pistolets enregistrés</div></div>
+    <div class="kpi"><div class="bar" style="background:${pistoKo>0?'var(--status-critique)':'var(--status-suffisant)'}"></div><div class="val">${pistoTotal? Math.round(pistoOk/pistoTotal*100):0}%</div><div class="lbl">Pistolets opérationnels</div></div>
+  `;
+
+  // flare rack
+  const maxCouv = Math.max(...rows.map(r=>Math.min(r.couverture,36)), 6);
+  document.getElementById('flareRack').innerHTML = rows.map(r=>{
+    const h = Math.max(6, Math.min(r.couverture,36)/maxCouv*140);
+    return `<div class="flare-col">
+      <div class="flare-tube"><div class="flare-fill" style="height:${h}px;background:linear-gradient(${statusColor[r.statut]},${statusColor[r.statut]}cc);box-shadow:0 0 10px ${statusColor[r.statut]}66;"></div></div>
+      <div class="flare-code">${r.code}</div>
+      <div class="flare-val">${r.couverture>=999?'∞':r.couverture.toFixed(1)}m</div>
+    </div>`;
+  }).join('');
+
+  // bar chart stock
+  const ctx1 = document.getElementById('chartStock');
+  if(charts.stock) charts.stock.destroy();
+  charts.stock = new Chart(ctx1, {
+    type:'bar',
+    data:{ labels: rows.map(r=>r.code), datasets:[{ data: rows.map(r=>r.stock), backgroundColor: rows.map(r=>statusColor[r.statut]), borderRadius:4, maxBarThickness:26 }]},
+    options:{ plugins:{legend:{display:false}}, scales:{ x:{ ticks:{color:'#5B6472',font:{size:10}}, grid:{color:'#E4E7EC'} }, y:{ ticks:{color:'#5B6472',font:{size:10}}, grid:{color:'#E4E7EC'} } } }
+  });
+
+  // pistolets doughnut
+  const ctx2 = document.getElementById('chartPistolets');
+  if(charts.pisto) charts.pisto.destroy();
+  const pistoCounts = { fonctionnel:rows.reduce((s,r)=>s+r.pistoOk,0), maintenance:rows.reduce((s,r)=>s+r.pistoMaint,0), panne:pistoKo, reforme: pistoTotal - pistoOk - pistoKo - rows.reduce((s,r)=>s+r.pistoMaint,0) };
+  charts.pisto = new Chart(ctx2, {
+    type:'doughnut',
+    data:{ labels:['Fonctionnel','Maintenance','En panne','Réformé'], datasets:[{ data:[pistoCounts.fonctionnel,pistoCounts.maintenance,pistoCounts.panne,Math.max(pistoCounts.reforme,0)], backgroundColor:['#3DAE73','#E8C547','#E5484D','#5B6472'], borderWidth:0 }]},
+    options:{ plugins:{legend:{position:'bottom',labels:{color:'#5B6472',font:{size:11},padding:14}}}, cutout:'65%' }
+  });
+
+  // status doughnut
+  const ctx3 = document.getElementById('chartStatus');
+  if(charts.status) charts.status.destroy();
+  const statusCounts = {critique:0,faible:0,moyen:0,suffisant:0};
+  rows.forEach(r=>statusCounts[r.statut]++);
+  charts.status = new Chart(ctx3, {
+    type:'doughnut',
+    data:{ labels:['Critique','Faible','Moyen','Suffisant'], datasets:[{ data:[statusCounts.critique,statusCounts.faible,statusCounts.moyen,statusCounts.suffisant], backgroundColor:['#E5484D','#F2994E','#E8C547','#3DAE73'], borderWidth:0 }]},
+    options:{ plugins:{legend:{position:'bottom',labels:{color:'#5B6472',font:{size:11},padding:14}}}, cutout:'65%' }
+  });
+
+  // alerts
+  const alerts = [];
+  rows.forEach(r=>{
+    if(r.statut==='critique') alerts.push({who:r.code, desc:`Stock cartouches critique — couverture ${r.couverture.toFixed(1)} mois`});
+    if(r.statut==='faible') alerts.push({who:r.code, desc:`Stock cartouches faible — couverture ${r.couverture.toFixed(1)} mois`});
+    if(r.pistoKo>0) alerts.push({who:r.code, desc:`${r.pistoKo} pistolet(s) en panne`});
+    STATE[r.code].pistolets.forEach(p=>{
+      if(p.prochain){
+        const days = (new Date(p.prochain) - new Date())/86400000;
+        if(days < 30) alerts.push({who:r.code, desc:`Contrôle du pistolet ${p.serie} ${days<0?'dépassé':'à prévoir sous 30 jours'}`});
+      }
+    });
+  });
+  document.getElementById('alertCount').textContent = alerts.length + ' alerte(s)';
+  const al = document.getElementById('alertList');
+  al.innerHTML = alerts.length ? alerts.slice(0,10).map(a=>`
+    <div class="alert-item"><div><div class="who">${a.who}</div><div class="desc">${a.desc}</div></div><span class="chip critique">Action requise</span></div>
+  `).join('') : `<div class="empty-state"><div class="big">Aucune alerte active</div><div>Tous les sites sont dans les seuils attendus.</div></div>`;
+
+  // master table
+  renderMasterTable(rows);
+}
+
+let sortState = {k:'region', dir:1};
+function renderMasterTable(rows){
+  const sorted = [...rows].sort((a,b)=>{
+    const map = {region:'code', stock:'stock', conso:'conso', couverture:'couverture', statut:'statut', pisto:'pistoTotal', pistoOk:'pistoOk', pistoKo:'pistoKo', maj:'lastUpdate'};
+    const key = map[sortState.k];
+    let av = a[key], bv = b[key];
+    if(key==='code'||key==='statut') { av=String(av); bv=String(bv); return sortState.dir*av.localeCompare(bv); }
+    av = av||0; bv = bv||0;
+    return sortState.dir*(av>bv?1:av<bv?-1:0);
+  });
+  const body = document.getElementById('masterTableBody');
+  body.innerHTML = sorted.map(r=>`
+    <tr class="${r.statut==='critique'?'alert-row':''}">
+      <td><strong>${r.code}</strong></td>
+      <td class="num mono">${r.stock.toLocaleString('fr-FR')}</td>
+      <td class="num mono">${r.conso}</td>
+      <td class="num mono">${r.couverture>=999?'∞':r.couverture.toFixed(1)}</td>
+      <td><span class="chip ${r.statut}">${statusLabel[r.statut].split(' (')[0]}</span></td>
+      <td class="num mono">${r.pistoTotal}</td>
+      <td class="num mono">${r.pistoOk}</td>
+      <td class="num mono">${r.pistoKo}</td>
+      <td class="mono" style="font-size:11px;color:var(--text-dim);">${r.lastUpdate ? new Date(r.lastUpdate).toLocaleDateString('fr-FR') : '—'}</td>
+    </tr>`).join('');
+}
+document.querySelectorAll('#masterTable th').forEach(th=>{
+  th.addEventListener('click', ()=>{
+    if(sortState.k===th.dataset.k) sortState.dir *= -1; else { sortState.k = th.dataset.k; sortState.dir = 1; }
+    renderMasterTable(allComputed());
+  });
+});
+
+/* ============ GLOBAL REGISTRIES ============ */
+function renderCartGlobal(){
+  const rows = allComputed();
+  document.getElementById('cartGlobalBody').innerHTML = rows.map(r=>{
+    const d = STATE[r.code].cartouches;
+    return `<tr>
+      <td><strong>${r.code}</strong></td>
+      <td class="num mono">${d.stockInitial}</td>
+      <td class="num mono">${r.entreesQty}</td>
+      <td class="num mono">${r.sortiesQty}</td>
+      <td class="num mono">${r.stock}</td>
+      <td class="num mono">${d.conso}</td>
+      <td class="num mono">${r.couverture>=999?'∞':r.couverture.toFixed(1)}</td>
+      <td><span class="chip ${r.statut}">${statusLabel[r.statut].split(' (')[0]}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderPistoGlobal(){
+  const all = [];
+  REGIONS.forEach(code=> STATE[code].pistolets.forEach(p=> all.push({code,...p})));
+  const total = all.length;
+  const ok = all.filter(p=>p.etat==='fonctionnel').length;
+  const panne = all.filter(p=>p.etat==='panne').length;
+  const maint = all.filter(p=>p.etat==='maintenance').length;
+  document.getElementById('pistoKpiRow').innerHTML = `
+    <div class="kpi"><div class="bar" style="background:var(--accent-flare)"></div><div class="val">${total}</div><div class="lbl">Pistolets au total</div></div>
+    <div class="kpi"><div class="bar" style="background:var(--status-suffisant)"></div><div class="val">${ok}</div><div class="lbl">Fonctionnels</div></div>
+    <div class="kpi"><div class="bar" style="background:var(--status-moyen)"></div><div class="val">${maint}</div><div class="lbl">En maintenance</div></div>
+    <div class="kpi"><div class="bar" style="background:var(--status-critique)"></div><div class="val">${panne}</div><div class="lbl">En panne</div></div>
+  `;
+  document.getElementById('pistoGlobalBody').innerHTML = all.length ? all.map(p=>`
+    <tr>
+      <td><strong>${p.code}</strong></td>
+      <td class="mono">${p.serie}</td>
+      <td>${p.modele||'—'}</td>
+      <td><span class="chip ${etatClass[p.etat]}">${etatLabel[p.etat]}</span></td>
+      <td class="mono">${p.dernier||'—'}</td>
+      <td class="mono">${p.prochain||'—'}</td>
+      <td>${p.resp||'—'}</td>
+      <td>${p.obs||'—'}</td>
+    </tr>`).join('') : `<tr><td colspan="8" style="text-align:center;color:var(--text-dim);padding:24px;">Aucun pistolet enregistré pour l'instant. Ajoutez-en depuis l'espace région.</td></tr>`;
+}
+
+/* ============ CLOCK ============ */
+function tickClock(){
+  document.getElementById('clock').textContent = new Date().toLocaleString('fr-FR', {weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+}
+setInterval(tickClock, 1000*30);
+
+/* ============ INIT ============ */
+(async function init(){
+  await loadAll();
+  tickClock();
+  renderDashboard();
+  regionSelect.value = currentRegion;
+  renderRegionPage();
+})();
+</script>
+</body>
+</html>

@@ -6,7 +6,26 @@
 <title>SENTINEL PLF — Suivi Cartouches &amp; Pistolets Lance-Fusées</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script>
+  // Chargement de Chart.js avec repli automatique si le premier CDN est bloqué.
+  // window.__chartReady est une Promise que le script principal attend avant de dessiner les graphiques.
+  window.__chartReady = new Promise((resolve)=>{
+    function inject(src, onFail){
+      const s = document.createElement('script');
+      s.src = src;
+      s.onload = ()=>resolve(true);
+      s.onerror = onFail;
+      document.head.appendChild(s);
+    }
+    inject("https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js", function(){
+      console.warn("cdnjs indisponible, tentative avec jsdelivr...");
+      inject("https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js", function(){
+        console.error("Impossible de charger Chart.js depuis les deux CDN (cdnjs et jsdelivr). Vérifiez la connexion internet ou le pare-feu.");
+        resolve(false);
+      });
+    });
+  });
+</script>
 <style>
 :root{
   --bg-deep:#F5F6F8;
@@ -573,7 +592,7 @@ document.querySelectorAll('.nav-item').forEach(item=>{
     };
     document.getElementById('pageTitle').textContent = titles[page][0];
     document.getElementById('pageSub').textContent = titles[page][1];
-    if(page==='dashboard') renderDashboard();
+    if(page==='dashboard'){ (window.__lastChartOk!==false) ? renderDashboard() : renderDashboardWithoutCharts(); }
     if(page==='cartouches') renderCartGlobal();
     if(page==='pistolets') renderPistoGlobal();
   });
@@ -993,12 +1012,60 @@ setInterval(tickClock, 1000*30);
 
 /* ============ INIT ============ */
 (async function init(){
+  const chartOk = await window.__chartReady;
+  window.__lastChartOk = chartOk;
+  if(!chartOk){
+    document.querySelectorAll('#page-dashboard canvas').forEach(c=>{
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'padding:16px;color:var(--status-critique);font-size:12.5px;border:1px dashed var(--status-critique);border-radius:8px;';
+      wrap.textContent = "Graphique indisponible : la librairie Chart.js n'a pas pu être chargée (connexion internet ou pare-feu bloquant cdnjs.cloudflare.com / cdn.jsdelivr.net).";
+      c.replaceWith(wrap);
+    });
+  }
   await loadAll();
   tickClock();
-  renderDashboard();
+  if(chartOk) renderDashboard(); else renderDashboardWithoutCharts();
   regionSelect.value = currentRegion;
   renderRegionPage();
 })();
+
+function renderDashboardWithoutCharts(){
+  // Version de secours : affiche les KPI et la jauge (qui ne dépendent pas de Chart.js) sans planter sur les canvas manquants.
+  const rows = allComputed();
+  const stockTotal = rows.reduce((s,r)=>s+r.stock,0);
+  const pistoTotal = rows.reduce((s,r)=>s+r.pistoTotal,0);
+  const pistoOk = rows.reduce((s,r)=>s+r.pistoOk,0);
+  const pistoKo = rows.reduce((s,r)=>s+r.pistoKo,0);
+  const critiques = rows.filter(r=>r.statut==='critique').length;
+  document.getElementById('kpiRow').innerHTML = `
+    <div class="kpi"><div class="bar" style="background:var(--accent-flare)"></div><div class="val">${REGIONS.length}</div><div class="lbl">Sites suivis</div></div>
+    <div class="kpi"><div class="bar" style="background:var(--status-suffisant)"></div><div class="val">${stockTotal.toLocaleString('fr-FR')}</div><div class="lbl">Cartouches en stock</div></div>
+    <div class="kpi"><div class="bar" style="background:var(--status-critique)"></div><div class="val">${critiques}</div><div class="lbl">Sites en stock critique</div></div>
+    <div class="kpi"><div class="bar" style="background:var(--accent-flare-glow)"></div><div class="val">${pistoTotal}</div><div class="lbl">Pistolets enregistrés</div></div>
+    <div class="kpi"><div class="bar" style="background:${pistoKo>0?'var(--status-critique)':'var(--status-suffisant)'}"></div><div class="val">${pistoTotal? Math.round(pistoOk/pistoTotal*100):0}%</div><div class="lbl">Pistolets opérationnels</div></div>
+  `;
+  const maxCouv = Math.max(...rows.map(r=>Math.min(r.couverture,36)), 6);
+  document.getElementById('flareRack').innerHTML = rows.map(r=>{
+    const h = Math.max(6, Math.min(r.couverture,36)/maxCouv*140);
+    return `<div class="flare-col">
+      <div class="flare-tube"><div class="flare-fill" style="height:${h}px;background:linear-gradient(${statusColor[r.statut]},${statusColor[r.statut]}cc);box-shadow:0 0 10px ${statusColor[r.statut]}66;"></div></div>
+      <div class="flare-code">${r.code}</div>
+      <div class="flare-val">${r.couverture>=999?'∞':r.couverture.toFixed(1)}m</div>
+    </div>`;
+  }).join('');
+  const alerts = [];
+  rows.forEach(r=>{
+    if(r.statut==='critique') alerts.push({who:r.code, desc:`Stock cartouches critique — couverture ${r.couverture.toFixed(1)} mois`});
+    if(r.statut==='faible') alerts.push({who:r.code, desc:`Stock cartouches faible — couverture ${r.couverture.toFixed(1)} mois`});
+    if(r.pistoKo>0) alerts.push({who:r.code, desc:`${r.pistoKo} pistolet(s) en panne`});
+  });
+  document.getElementById('alertCount').textContent = alerts.length + ' alerte(s)';
+  const al = document.getElementById('alertList');
+  al.innerHTML = alerts.length ? alerts.slice(0,10).map(a=>`
+    <div class="alert-item"><div><div class="who">${a.who}</div><div class="desc">${a.desc}</div></div><span class="chip critique">Action requise</span></div>
+  `).join('') : `<div class="empty-state"><div class="big">Aucune alerte active</div><div>Tous les sites sont dans les seuils attendus.</div></div>`;
+  renderMasterTable(rows);
+}
 </script>
 </body>
 </html>

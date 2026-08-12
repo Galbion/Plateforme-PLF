@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SENTINEL PLF — Suivi Cartouches &amp; Pistolets Lance-Fusées</title>
+<title>SENTINEL PLF — Suivi Cartouches &amp; Pistolets Lance-Fusées (PLF)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script>
@@ -220,7 +220,54 @@ canvas{max-height:230px;}
 .subtable-actions{display:flex;gap:6px;}
 .section-title{font-size:11px;color:var(--text-dim);letter-spacing:1.2px;text-transform:uppercase;margin:22px 0 10px;}
 .pill-count{background:var(--bg-panel-raised);border:1px solid var(--line);border-radius:20px;padding:2px 9px;font-size:11px;color:var(--text-mid);margin-left:8px;}
+.unit-suffix{font-size:13px;font-weight:600;color:var(--text-mid);margin-left:4px;}
+.input-unit{position:relative;}
+.input-unit input{padding-right:96px;}
+.input-unit .unit-tag{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10.5px;color:var(--text-mid);background:var(--bg-panel);border:1px solid var(--line);padding:3px 8px;border-radius:5px;pointer-events:none;white-space:nowrap;}
+.field-hint{font-size:10.5px;color:var(--text-dim);margin-top:5px;}
+.responsables-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media(max-width:1100px){.responsables-grid{grid-template-columns:1fr;}}
 @media(max-width:1100px){.kpi-row{grid-template-columns:repeat(2,1fr);}.grid-2,.charts-row,.two-col-form{grid-template-columns:1fr;}}
+
+/* ============ REFERENCES ============ */
+.ref-tabs{display:flex;gap:6px;margin-bottom:16px;}
+.ref-tab{padding:7px 14px;border-radius:20px;font-size:12.5px;font-weight:600;color:var(--text-mid);background:var(--bg-panel-raised);border:1px solid var(--line);cursor:pointer;user-select:none;}
+.ref-tab.active{color:#fff;background:linear-gradient(160deg,var(--accent-flare),#e85e12);border-color:transparent;}
+.ref-list{display:flex;flex-direction:column;gap:10px;}
+.ref-item{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:14px 16px;background:var(--bg-panel-raised);border:1px solid var(--line);border-radius:9px;}
+.ref-item-main{display:flex;flex-direction:column;gap:5px;flex:1;min-width:0;}
+.ref-item-title{font-size:13.5px;font-weight:600;color:var(--text-hi);}
+.ref-item-desc{font-size:12.5px;color:var(--text-mid);}
+.ref-item-meta{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--text-dim);}
+.ref-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:600;white-space:nowrap;}
+.ref-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;}
+.ref-badge.reglementaire{background:rgba(39,117,224,0.14);color:var(--color-sortie);}
+.ref-badge.interne{background:rgba(61,174,115,0.14);color:var(--status-suffisant);}
+.ref-item-actions{display:flex;gap:8px;flex-shrink:0;}
+.ref-file-chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--accent-flare);text-decoration:none;font-weight:600;}
+.ref-file-chip:hover{text-decoration:underline;}
+.ref-no-file{font-size:11.5px;color:var(--text-dim);font-style:italic;}
+
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(20,25,35,.5);display:none;align-items:center;justify-content:center;z-index:200;padding:20px;
+}
+.modal-overlay.show{display:flex;}
+.modal-box{
+  background:var(--bg-panel);border-radius:12px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;
+  box-shadow:0 20px 50px rgba(20,25,35,.3);
+}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line);}
+.modal-head h2{font-size:15px;}
+.modal-close{cursor:pointer;font-size:18px;color:var(--text-dim);line-height:1;background:none;border:none;}
+.modal-close:hover{color:var(--text-hi);}
+.modal-body{padding:20px;display:flex;flex-direction:column;gap:14px;}
+.modal-foot{padding:16px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;}
+.file-drop{
+  border:1.5px dashed var(--line);border-radius:9px;padding:16px;text-align:center;cursor:pointer;background:var(--bg-panel-raised);
+}
+.file-drop:hover{border-color:var(--accent-flare);}
+.file-drop-label{font-size:12.5px;color:var(--text-mid);}
+.file-drop-name{font-size:12.5px;color:var(--accent-flare);font-weight:600;margin-top:6px;word-break:break-all;}
 </style>
 </head>
 <body>
@@ -248,6 +295,8 @@ canvas{max-height:230px;}
       <div class="nav-label">Registres</div>
       <div class="nav-item" data-page="cartouches"><span class="nav-dot"></span>Cartouches — vue globale</div>
       <div class="nav-item" data-page="pistolets"><span class="nav-dot"></span>Pistolets — vue globale</div>
+      <div class="nav-label">Documentation</div>
+      <div class="nav-item" data-page="references"><span class="nav-dot"></span>Références réglementaires &amp; internes</div>
     </div>
     <div class="sidebar-foot">
       <div class="clock" id="clock">--</div>
@@ -285,8 +334,14 @@ canvas{max-height:230px;}
 
         <div class="charts-row">
           <div class="panel">
-            <div class="panel-head"><h2>Stock actuel de cartouches par site</h2></div>
+            <div class="panel-head"><h2>Stock actuel de cartouches par site</h2><div class="hint">Valeurs en nombre de cartouches</div></div>
             <canvas id="chartStock"></canvas>
+            <div class="legend-row" style="margin-top:10px;">
+              <div class="legend-item"><span class="legend-dot" style="background:var(--status-critique)"></span>Critique &lt; 1 mois</div>
+              <div class="legend-item"><span class="legend-dot" style="background:var(--status-faible)"></span>Faible 1–3 mois</div>
+              <div class="legend-item"><span class="legend-dot" style="background:var(--status-moyen)"></span>Moyen 3–6 mois</div>
+              <div class="legend-item"><span class="legend-dot" style="background:var(--status-suffisant)"></span>Suffisant &gt; 6 mois</div>
+            </div>
           </div>
           <div class="panel">
             <div class="panel-head"><h2>État du parc de pistolets</h2></div>
@@ -334,9 +389,9 @@ canvas{max-height:230px;}
               <thead>
                 <tr>
                   <th data-k="region">Région</th>
-                  <th data-k="stock" class="num">Stock cartouches</th>
-                  <th data-k="conso" class="num">Conso. / mois</th>
-                  <th data-k="couverture" class="num">Couverture</th>
+                  <th data-k="stock" class="num">Stock cartouches (u)</th>
+                  <th data-k="conso" class="num">Conso. (cartouches/mois)</th>
+                  <th data-k="couverture" class="num">Couverture (mois)</th>
                   <th data-k="statut">Statut</th>
                   <th data-k="pisto" class="num">Pistolets</th>
                   <th data-k="pistoOk" class="num">Fonctionnels</th>
@@ -353,61 +408,84 @@ canvas{max-height:230px;}
       <!-- ============ REGION DATA ENTRY ============ -->
       <div class="page" id="page-region">
         <div class="panel" style="margin-bottom:18px;">
-          <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+          <div class="panel-head"><h2>Site sélectionné</h2><div class="hint">Choisissez le site à renseigner</div></div>
+          <div class="form-grid" style="grid-template-columns:1fr;">
             <div class="field">
               <label>Site / Région</label>
               <select id="regionSelect"></select>
             </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-bottom:18px;">
+          <div class="panel-head"><h2>Responsables du site</h2><div class="hint">Contacts référents — mis à jour automatiquement à la saisie</div></div>
+          <div class="responsables-grid">
             <div class="field">
               <label>Responsable du site</label>
-              <input type="text" id="responsableSite" placeholder="Nom du responsable">
+              <input type="text" id="responsableSite" placeholder="Nom et prénom">
+            </div>
+            <div class="field">
+              <label>Directeur régional</label>
+              <input type="text" id="directeurRegional" placeholder="Nom et prénom">
+            </div>
+            <div class="field">
+              <label>Responsable HSE</label>
+              <input type="text" id="responsableHSE" placeholder="Nom et prénom">
             </div>
           </div>
         </div>
 
         <div class="tabs">
           <div class="tab active" data-tab="tab-cart">Cartouches PLF</div>
-          <div class="tab" data-tab="tab-pist">Pistolets lance-fusées</div>
+          <div class="tab" data-tab="tab-pist">Pistolets lance-fusées (PLF)</div>
         </div>
 
         <div id="tab-cart">
           <div class="grid-3" style="margin-bottom:18px;">
-            <div class="kpi"><div class="bar" style="background:var(--accent-flare)"></div><div class="val" id="rStock">–</div><div class="lbl">Stock actuel</div></div>
+            <div class="kpi"><div class="bar" style="background:var(--accent-flare)"></div><div class="val" id="rStock">–</div><div class="lbl">Stock actuel (cartouches)</div></div>
             <div class="kpi"><div class="bar" style="background:var(--status-moyen)"></div><div class="val" id="rCouverture">–</div><div class="lbl">Couverture (mois)</div></div>
             <div class="kpi"><div class="bar" style="background:var(--status-suffisant)"></div><div class="val" id="rStatut">–</div><div class="lbl">Statut</div></div>
           </div>
 
           <div class="panel">
             <div class="panel-head"><h2>Consommation mensuelle estimée</h2><div class="hint">Sert au calcul de couverture</div></div>
-            <div class="form-grid" style="grid-template-columns:220px auto;align-items:end;">
-              <div class="field"><label>Cartouches / mois</label><input type="number" id="consoInput" min="0"></div>
+            <div class="form-grid" style="grid-template-columns:260px auto;align-items:end;">
+              <div class="field"><label>Consommation mensuelle</label>
+                <div class="input-unit"><input type="number" id="consoInput" min="0" placeholder="0"><span class="unit-tag">cartouches/mois</span></div>
+              </div>
               <button class="btn secondary" id="saveConso">Mettre à jour</button>
             </div>
           </div>
 
           <div class="two-col-form">
             <div class="panel entree">
-              <div class="panel-head"><h2>Nouvelle entrée</h2></div>
+              <div class="panel-head"><h2>Nouvelle entrée</h2><div class="hint">Réf. déjà existante = mise à jour</div></div>
               <div class="form-grid">
                 <div class="field"><label>Date</label><input type="date" id="eDate"></div>
-                <div class="field"><label>Quantité</label><input type="number" id="eQty" min="1"></div>
-                <div class="field"><label>N° Bon / Référence</label><input type="text" id="eRef"></div>
-                <div class="field"><label>Fournisseur / Provenance</label><input type="text" id="eProv"></div>
-                <div class="field"><label>Responsable</label><input type="text" id="eResp"></div>
+                <div class="field"><label>Quantité</label>
+                  <div class="input-unit"><input type="number" id="eQty" min="1" placeholder="0"><span class="unit-tag">cartouches</span></div>
+                </div>
+                <div class="field"><label>N° Bon / Référence</label><input type="text" id="eRef" placeholder="Ex: BR-2026-014"></div>
+                <div class="field"><label>Fournisseur / Provenance</label><input type="text" id="eProv" placeholder="Ex: Dépôt central"></div>
+                <div class="field"><label>Responsable</label><input type="text" id="eResp" placeholder="Nom et prénom"></div>
                 <div class="field" style="grid-column:1/-1;"><label>Observations</label><input type="text" id="eObs"></div>
               </div>
+              <div class="field-hint">Si la référence saisie correspond à une entrée existante, celle-ci sera mise à jour au lieu d'être dupliquée.</div>
               <div style="margin-top:14px;"><button class="btn entree" id="addEntree">Enregistrer l'entrée</button></div>
             </div>
             <div class="panel sortie">
-              <div class="panel-head"><h2>Nouvelle sortie</h2></div>
+              <div class="panel-head"><h2>Nouvelle sortie</h2><div class="hint">Réf. déjà existante = mise à jour</div></div>
               <div class="form-grid">
                 <div class="field"><label>Date</label><input type="date" id="sDate"></div>
-                <div class="field"><label>Quantité</label><input type="number" id="sQty" min="1"></div>
-                <div class="field"><label>N° Bon / Référence</label><input type="text" id="sRef"></div>
-                <div class="field"><label>Destinataire / Motif</label><input type="text" id="sDest"></div>
-                <div class="field"><label>Responsable</label><input type="text" id="sResp"></div>
+                <div class="field"><label>Quantité</label>
+                  <div class="input-unit"><input type="number" id="sQty" min="1" placeholder="0"><span class="unit-tag">cartouches</span></div>
+                </div>
+                <div class="field"><label>N° Bon / Référence</label><input type="text" id="sRef" placeholder="Ex: BS-2026-007"></div>
+                <div class="field"><label>Destinataire / Motif</label><input type="text" id="sDest" placeholder="Ex: Exercice sécurité"></div>
+                <div class="field"><label>Responsable</label><input type="text" id="sResp" placeholder="Nom et prénom"></div>
                 <div class="field" style="grid-column:1/-1;"><label>Observations</label><input type="text" id="sObs"></div>
               </div>
+              <div class="field-hint">Si la référence saisie correspond à une sortie existante, celle-ci sera mise à jour au lieu d'être dupliquée.</div>
               <div style="margin-top:14px;"><button class="btn sortie" id="addSortie">Enregistrer la sortie</button></div>
             </div>
           </div>
@@ -416,7 +494,7 @@ canvas{max-height:230px;}
             <div class="panel-head"><h2>Historique du site</h2></div>
             <div style="overflow-x:auto;">
               <table>
-                <thead><tr><th>Date</th><th>Mouvement</th><th class="num">Quantité</th><th>Référence</th><th>Provenance / Destinataire</th><th>Responsable</th><th>Observations</th></tr></thead>
+                <thead><tr><th>Date</th><th>Mouvement</th><th class="num">Quantité (cartouches)</th><th>Référence</th><th>Provenance / Destinataire</th><th>Responsable</th><th>Observations</th></tr></thead>
                 <tbody id="historyBody"></tbody>
               </table>
             </div>
@@ -425,7 +503,7 @@ canvas{max-height:230px;}
 
         <div id="tab-pist" style="display:none;">
           <div class="panel entree">
-            <div class="panel-head"><h2>Nouvelle entrée — Pistolet lance-fusées</h2><div class="hint">Enregistrement d'un pistolet dans le parc du site</div></div>
+            <div class="panel-head"><h2>Nouvelle entrée — Pistolet lance-fusées</h2><div class="hint">N° de série déjà existant = mise à jour</div></div>
             <div class="form-grid">
               <div class="field"><label>N° de série</label><input type="text" id="pSerie" placeholder="Ex: PLF-2024-018"></div>
               <div class="field"><label>Marque / Modèle</label><input type="text" id="pModele" placeholder="Ex: Cerbérus 2000"></div>
@@ -439,9 +517,10 @@ canvas{max-height:230px;}
               </div>
               <div class="field"><label>Dernier contrôle</label><input type="date" id="pDernier"></div>
               <div class="field"><label>Prochain contrôle</label><input type="date" id="pProchain"></div>
-              <div class="field"><label>Responsable</label><input type="text" id="pResp"></div>
+              <div class="field"><label>Responsable</label><input type="text" id="pResp" placeholder="Nom et prénom"></div>
               <div class="field" style="grid-column:1/-1;"><label>Observations</label><input type="text" id="pObs"></div>
             </div>
+            <div class="field-hint">Si le n° de série saisi correspond à un pistolet déjà enregistré sur ce site, sa fiche sera mise à jour au lieu de créer un doublon.</div>
             <div style="margin-top:14px;"><button class="btn entree" id="addPistolet">Enregistrer l'entrée du pistolet</button></div>
           </div>
 
@@ -467,7 +546,7 @@ canvas{max-height:230px;}
           <div class="panel-head"><h2>Registre consolidé — Cartouches PLF</h2></div>
           <div style="overflow-x:auto;">
             <table>
-              <thead><tr><th>Région</th><th class="num">Stock initial</th><th class="num">Entrées</th><th class="num">Sorties</th><th class="num">Stock actuel</th><th class="num">Conso./mois</th><th class="num">Couverture</th><th>Statut</th></tr></thead>
+              <thead><tr><th>Région</th><th class="num">Stock initial (u)</th><th class="num">Entrées (u)</th><th class="num">Sorties (u)</th><th class="num">Stock actuel (u)</th><th class="num">Conso. (cartouches/mois)</th><th class="num">Couverture (mois)</th><th>Statut</th></tr></thead>
               <tbody id="cartGlobalBody"></tbody>
             </table>
           </div>
@@ -478,7 +557,7 @@ canvas{max-height:230px;}
       <div class="page" id="page-pistolets">
         <div class="kpi-row" id="pistoKpiRow" style="grid-template-columns:repeat(4,1fr);"></div>
         <div class="panel">
-          <div class="panel-head"><h2>Registre consolidé — Pistolets lance-fusées</h2></div>
+          <div class="panel-head"><h2>Registre consolidé — Pistolets lance-fusées (PLF)</h2></div>
           <div style="overflow-x:auto;">
             <table>
               <thead><tr><th>Région</th><th>N° Série</th><th>Modèle</th><th>État</th><th>Dernier contrôle</th><th>Prochain contrôle</th><th>Responsable</th><th>Observations</th></tr></thead>
@@ -488,9 +567,70 @@ canvas{max-height:230px;}
         </div>
       </div>
 
+      <!-- ============ REFERENCES ============ -->
+      <div class="page" id="page-references">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Références réglementaires &amp; internes</h2>
+            <button class="btn" id="openRefModal">+ Ajouter une référence</button>
+          </div>
+          <div class="ref-tabs" id="refTabs">
+            <div class="ref-tab active" data-filter="tous">Toutes<span class="pill-count" id="countTous">0</span></div>
+            <div class="ref-tab" data-filter="reglementaire">Réglementaires<span class="pill-count" id="countReg">0</span></div>
+            <div class="ref-tab" data-filter="interne">Internes<span class="pill-count" id="countInt">0</span></div>
+          </div>
+          <div class="ref-list" id="refList"></div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
+
+<!-- ============ MODAL — AJOUTER UNE REFERENCE ============ -->
+<div class="modal-overlay" id="refModalOverlay">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2>Ajouter une référence</h2>
+      <button class="modal-close" id="closeRefModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Titre *</label>
+        <input type="text" id="refTitle" placeholder="Ex : Arrêté relatif à la sécurité incendie">
+      </div>
+      <div class="field">
+        <label>Catégorie *</label>
+        <select id="refCategory">
+          <option value="reglementaire">Réglementaire</option>
+          <option value="interne">Interne</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>N° de référence / code</label>
+        <input type="text" id="refNumber" placeholder="Ex : PLF-INT-2026-014">
+      </div>
+      <div class="field">
+        <label>Description</label>
+        <textarea id="refDescription" rows="3" placeholder="Objet, portée, remarques..."></textarea>
+      </div>
+      <div class="field">
+        <label>Fichier joint</label>
+        <div class="file-drop" id="refFileDrop">
+          <div class="file-drop-label">Cliquez pour choisir un fichier (PDF, Word, image...) — 4 Mo max</div>
+          <div class="file-drop-name" id="refFileName"></div>
+        </div>
+        <input type="file" id="refFileInput" style="display:none;">
+        <div class="field-hint">Le fichier est enregistré avec la référence et visible par tous les utilisateurs de la plateforme.</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn secondary" id="cancelRefModal">Annuler</button>
+      <button class="btn" id="saveRefBtn">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -550,6 +690,8 @@ async function loadRegion(code){
     cartouches:{ stockInitial:seed.stockInitial, conso:seed.conso, entrees:seed.entrees.map(x=>({...x,id:uid()})), sorties:seed.sorties.map(x=>({...x,id:uid()})) },
     pistolets: [],
     responsableSite: "",
+    directeurRegional: "",
+    responsableHSE: "",
     lastUpdate: null
   };
   STATE[code] = data;
@@ -588,13 +730,15 @@ document.querySelectorAll('.nav-item').forEach(item=>{
       dashboard:["Tableau de bord Direction","Vue consolidée du stock de cartouches et de l'état du parc de pistolets PLF"],
       region:["Espace Région — Saisie","Renseignez les mouvements de cartouches et l'état du parc de pistolets de votre site"],
       cartouches:["Registre global — Cartouches","Vue consolidée de tous les sites"],
-      pistolets:["Registre global — Pistolets","Vue consolidée du parc de pistolets lance-fusées"]
+      pistolets:["Registre global — Pistolets","Vue consolidée du parc de pistolets lance-fusées (PLF)"],
+      references:["Références réglementaires & internes","Textes réglementaires, procédures et documents internes liés aux PLF"]
     };
     document.getElementById('pageTitle').textContent = titles[page][0];
     document.getElementById('pageSub').textContent = titles[page][1];
     if(page==='dashboard'){ (window.__lastChartOk!==false) ? renderDashboard() : renderDashboardWithoutCharts(); }
     if(page==='cartouches') renderCartGlobal();
     if(page==='pistolets') renderPistoGlobal();
+    if(page==='references') renderReferences();
   });
 });
 
@@ -621,12 +765,24 @@ regionSelect.addEventListener('change', ()=>{
 document.getElementById('responsableSite').addEventListener('change', async (e)=>{
   STATE[currentRegion].responsableSite = e.target.value;
   await saveRegion(currentRegion);
-  showToast("Responsable mis à jour");
+  showToast("Responsable du site mis à jour");
+});
+document.getElementById('directeurRegional').addEventListener('change', async (e)=>{
+  STATE[currentRegion].directeurRegional = e.target.value;
+  await saveRegion(currentRegion);
+  showToast("Directeur régional mis à jour");
+});
+document.getElementById('responsableHSE').addEventListener('change', async (e)=>{
+  STATE[currentRegion].responsableHSE = e.target.value;
+  await saveRegion(currentRegion);
+  showToast("Responsable HSE mis à jour");
 });
 
 function renderRegionPage(){
   const data = STATE[currentRegion];
   document.getElementById('responsableSite').value = data.responsableSite || "";
+  document.getElementById('directeurRegional').value = data.directeurRegional || "";
+  document.getElementById('responsableHSE').value = data.responsableHSE || "";
   document.getElementById('consoInput').value = data.cartouches.conso;
   const c = computeCart(data.cartouches);
   document.getElementById('rStock').textContent = c.stock;
@@ -664,29 +820,47 @@ document.getElementById('saveConso').addEventListener('click', async ()=>{
 
 document.getElementById('addEntree').addEventListener('click', async ()=>{
   const qty = Number(document.getElementById('eQty').value);
-  if(!qty || qty<=0){ showToast("Indiquez une quantité valide"); return; }
-  STATE[currentRegion].cartouches.entrees.push({
-    id:uid(), date:document.getElementById('eDate').value || new Date().toISOString().slice(0,10),
-    qty, ref:document.getElementById('eRef').value, prov:document.getElementById('eProv').value,
+  if(!qty || qty<=0){ showToast("Indiquez une quantité valide (en cartouches)"); return; }
+  const ref = document.getElementById('eRef').value.trim();
+  const payload = {
+    date:document.getElementById('eDate').value || new Date().toISOString().slice(0,10),
+    qty, ref, prov:document.getElementById('eProv').value,
     resp:document.getElementById('eResp').value, obs:document.getElementById('eObs').value
-  });
+  };
+  const entrees = STATE[currentRegion].cartouches.entrees;
+  const existing = ref ? entrees.find(e=>(e.ref||'').trim().toLowerCase()===ref.toLowerCase()) : null;
+  if(existing){
+    Object.assign(existing, payload);
+    showToast("Entrée mise à jour (référence existante : "+ref+")");
+  }else{
+    entrees.push({ id:uid(), ...payload });
+    showToast("Entrée enregistrée");
+  }
   await saveRegion(currentRegion);
   ['eDate','eQty','eRef','eProv','eResp','eObs'].forEach(id=>document.getElementById(id).value='');
-  showToast("Entrée enregistrée");
   renderRegionPage();
 });
 
 document.getElementById('addSortie').addEventListener('click', async ()=>{
   const qty = Number(document.getElementById('sQty').value);
-  if(!qty || qty<=0){ showToast("Indiquez une quantité valide"); return; }
-  STATE[currentRegion].cartouches.sorties.push({
-    id:uid(), date:document.getElementById('sDate').value || new Date().toISOString().slice(0,10),
-    qty, ref:document.getElementById('sRef').value, dest:document.getElementById('sDest').value,
+  if(!qty || qty<=0){ showToast("Indiquez une quantité valide (en cartouches)"); return; }
+  const ref = document.getElementById('sRef').value.trim();
+  const payload = {
+    date:document.getElementById('sDate').value || new Date().toISOString().slice(0,10),
+    qty, ref, dest:document.getElementById('sDest').value,
     resp:document.getElementById('sResp').value, obs:document.getElementById('sObs').value
-  });
+  };
+  const sorties = STATE[currentRegion].cartouches.sorties;
+  const existing = ref ? sorties.find(e=>(e.ref||'').trim().toLowerCase()===ref.toLowerCase()) : null;
+  if(existing){
+    Object.assign(existing, payload);
+    showToast("Sortie mise à jour (référence existante : "+ref+")");
+  }else{
+    sorties.push({ id:uid(), ...payload });
+    showToast("Sortie enregistrée");
+  }
   await saveRegion(currentRegion);
   ['sDate','sQty','sRef','sDest','sResp','sObs'].forEach(id=>document.getElementById(id).value='');
-  showToast("Sortie enregistrée");
   renderRegionPage();
 });
 
@@ -719,15 +893,23 @@ function renderPistoletTable(){
 document.getElementById('addPistolet').addEventListener('click', async ()=>{
   const serie = document.getElementById('pSerie').value.trim();
   if(!serie){ showToast("Le n° de série est requis"); return; }
-  STATE[currentRegion].pistolets.push({
-    id:uid(), serie, modele:document.getElementById('pModele').value,
+  const payload = {
+    serie, modele:document.getElementById('pModele').value,
     etat:document.getElementById('pEtat').value, dernier:document.getElementById('pDernier').value,
     prochain:document.getElementById('pProchain').value, resp:document.getElementById('pResp').value,
     obs:document.getElementById('pObs').value
-  });
+  };
+  const list = STATE[currentRegion].pistolets;
+  const existing = list.find(p=>(p.serie||'').trim().toLowerCase()===serie.toLowerCase());
+  if(existing){
+    Object.assign(existing, payload);
+    showToast("Pistolet mis à jour (n° série existant : "+serie+")");
+  }else{
+    list.push({ id:uid(), ...payload });
+    showToast("Pistolet ajouté au parc");
+  }
   await saveRegion(currentRegion);
   ['pSerie','pModele','pDernier','pProchain','pResp','pObs'].forEach(id=>document.getElementById(id).value='');
-  showToast("Pistolet ajouté au parc");
   renderPistoletTable();
 });
 
@@ -755,10 +937,10 @@ function renderDashboard(){
   const critiques = rows.filter(r=>r.statut==='critique').length;
 
   document.getElementById('kpiRow').innerHTML = `
-    <div class="kpi"><div class="bar" style="background:var(--accent-flare)"></div><div class="val">${REGIONS.length}</div><div class="lbl">Sites suivis</div></div>
-    <div class="kpi"><div class="bar" style="background:var(--status-suffisant)"></div><div class="val">${stockTotal.toLocaleString('fr-FR')}</div><div class="lbl">Cartouches en stock</div></div>
-    <div class="kpi"><div class="bar" style="background:var(--status-critique)"></div><div class="val">${critiques}</div><div class="lbl">Sites en stock critique</div></div>
-    <div class="kpi"><div class="bar" style="background:var(--accent-flare-glow)"></div><div class="val">${pistoTotal}</div><div class="lbl">Pistolets enregistrés</div></div>
+    <div class="kpi"><div class="bar" style="background:var(--accent-flare)"></div><div class="val">${REGIONS.length}<span class="unit-suffix">sites</span></div><div class="lbl">Sites suivis</div></div>
+    <div class="kpi"><div class="bar" style="background:var(--status-suffisant)"></div><div class="val">${stockTotal.toLocaleString('fr-FR')}<span class="unit-suffix">cart.</span></div><div class="lbl">Cartouches en stock</div></div>
+    <div class="kpi"><div class="bar" style="background:var(--status-critique)"></div><div class="val">${critiques}<span class="unit-suffix">sites</span></div><div class="lbl">Sites en stock critique</div></div>
+    <div class="kpi"><div class="bar" style="background:var(--accent-flare-glow)"></div><div class="val">${pistoTotal}<span class="unit-suffix">unités</span></div><div class="lbl">Pistolets enregistrés</div></div>
     <div class="kpi"><div class="bar" style="background:${pistoKo>0?'var(--status-critique)':'var(--status-suffisant)'}"></div><div class="val">${pistoTotal? Math.round(pistoOk/pistoTotal*100):0}%</div><div class="lbl">Pistolets opérationnels</div></div>
   `;
 
@@ -769,17 +951,70 @@ function renderDashboard(){
     return `<div class="flare-col">
       <div class="flare-tube"><div class="flare-fill" style="height:${h}px;background:linear-gradient(${statusColor[r.statut]},${statusColor[r.statut]}cc);box-shadow:0 0 10px ${statusColor[r.statut]}66;"></div></div>
       <div class="flare-code">${r.code}</div>
-      <div class="flare-val">${r.couverture>=999?'∞':r.couverture.toFixed(1)}m</div>
+      <div class="flare-val">${r.couverture>=999?'∞':r.couverture.toFixed(1)+' mois'}</div>
     </div>`;
   }).join('');
+
+  // plugin générique : étiquettes de valeur au-dessus des barres
+  const barValueLabelsPlugin = {
+    id:'barValueLabels',
+    afterDatasetsDraw(chart){
+      const {ctx} = chart;
+      const meta = chart.getDatasetMeta(0);
+      const data = chart.data.datasets[0].data;
+      ctx.save();
+      ctx.font = "600 10px Inter, sans-serif";
+      ctx.fillStyle = '#5B6472';
+      ctx.textAlign = 'center';
+      meta.data.forEach((bar,i)=>{
+        const v = data[i];
+        ctx.fillText(v.toLocaleString('fr-FR'), bar.x, bar.y - 6);
+      });
+      ctx.restore();
+    }
+  };
+
+  // plugin générique : étiquettes de valeur + pourcentage sur les anneaux
+  function doughnutValueLabelsPlugin(){
+    return {
+      id:'doughnutValueLabels',
+      afterDatasetsDraw(chart){
+        const {ctx} = chart;
+        const meta = chart.getDatasetMeta(0);
+        const data = chart.data.datasets[0].data;
+        const total = data.reduce((s,v)=>s+v,0) || 1;
+        ctx.save();
+        ctx.font = "700 10.5px Inter, sans-serif";
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        meta.data.forEach((arc,i)=>{
+          const v = data[i];
+          if(!v) return;
+          const pos = arc.tooltipPosition();
+          const pct = Math.round(v/total*100);
+          ctx.fillText(`${v} (${pct}%)`, pos.x, pos.y);
+        });
+        ctx.restore();
+      }
+    };
+  }
 
   // bar chart stock
   const ctx1 = document.getElementById('chartStock');
   if(charts.stock) charts.stock.destroy();
   charts.stock = new Chart(ctx1, {
     type:'bar',
-    data:{ labels: rows.map(r=>r.code), datasets:[{ data: rows.map(r=>r.stock), backgroundColor: rows.map(r=>statusColor[r.statut]), borderRadius:4, maxBarThickness:26 }]},
-    options:{ plugins:{legend:{display:false}}, scales:{ x:{ ticks:{color:'#5B6472',font:{size:10}}, grid:{color:'#E4E7EC'} }, y:{ ticks:{color:'#5B6472',font:{size:10}}, grid:{color:'#E4E7EC'} } } }
+    data:{ labels: rows.map(r=>r.code), datasets:[{ label:'Stock (cartouches)', data: rows.map(r=>r.stock), backgroundColor: rows.map(r=>statusColor[r.statut]), borderRadius:4, maxBarThickness:26 }]},
+    options:{
+      layout:{ padding:{top:18} },
+      plugins:{
+        legend:{ display:true, position:'bottom', labels:{color:'#5B6472',font:{size:11},padding:12,boxWidth:12} },
+        tooltip:{ callbacks:{ label:(c)=>`Stock : ${c.raw.toLocaleString('fr-FR')} cartouches` } }
+      },
+      scales:{ x:{ ticks:{color:'#5B6472',font:{size:10}}, grid:{color:'#E4E7EC'} }, y:{ title:{display:true,text:'Cartouches',color:'#5B6472',font:{size:10.5}}, ticks:{color:'#5B6472',font:{size:10}}, grid:{color:'#E4E7EC'} } }
+    },
+    plugins:[barValueLabelsPlugin]
   });
 
   // pistolets doughnut
@@ -789,7 +1024,14 @@ function renderDashboard(){
   charts.pisto = new Chart(ctx2, {
     type:'doughnut',
     data:{ labels:['Fonctionnel','Maintenance','En panne','Réformé'], datasets:[{ data:[pistoCounts.fonctionnel,pistoCounts.maintenance,pistoCounts.panne,Math.max(pistoCounts.reforme,0)], backgroundColor:['#3DAE73','#E8C547','#E5484D','#5B6472'], borderWidth:0 }]},
-    options:{ plugins:{legend:{position:'bottom',labels:{color:'#5B6472',font:{size:11},padding:14}}}, cutout:'65%' }
+    options:{
+      plugins:{
+        legend:{position:'bottom',labels:{color:'#5B6472',font:{size:11},padding:14}},
+        tooltip:{ callbacks:{ label:(c)=>`${c.label} : ${c.raw} pistolet(s)` } }
+      },
+      cutout:'65%'
+    },
+    plugins:[doughnutValueLabelsPlugin()]
   });
 
   // status doughnut
@@ -800,7 +1042,14 @@ function renderDashboard(){
   charts.status = new Chart(ctx3, {
     type:'doughnut',
     data:{ labels:['Critique','Faible','Moyen','Suffisant'], datasets:[{ data:[statusCounts.critique,statusCounts.faible,statusCounts.moyen,statusCounts.suffisant], backgroundColor:['#E5484D','#F2994E','#E8C547','#3DAE73'], borderWidth:0 }]},
-    options:{ plugins:{legend:{position:'bottom',labels:{color:'#5B6472',font:{size:11},padding:14}}}, cutout:'65%' }
+    options:{
+      plugins:{
+        legend:{position:'bottom',labels:{color:'#5B6472',font:{size:11},padding:14}},
+        tooltip:{ callbacks:{ label:(c)=>`${c.label} : ${c.raw} site(s)` } }
+      },
+      cutout:'65%'
+    },
+    plugins:[doughnutValueLabelsPlugin()]
   });
 
   // matrice stock vs consommation (scatter avec zones de risque)
@@ -887,7 +1136,7 @@ function renderDashboard(){
     type:'scatter',
     data:{ datasets:[{
       label:'Sites',
-      data: rows.map(r=>({x:r.conso, y:r.stock, code:r.code, color:statusColor[r.statut], couverture:r.couverture})),
+      data: rows.map(r=>({x:r.conso, y:r.stock, code:r.code, color:statusColor[r.statut], couverture:r.couverture, resp:r.responsable||'—'})),
       backgroundColor: rows.map(r=>statusColor[r.statut]),
       borderColor:'#fff', borderWidth:2,
       pointRadius:7, pointHoverRadius:9
@@ -895,12 +1144,24 @@ function renderDashboard(){
     options:{
       responsive:true, maintainAspectRatio:false,
       scales:{
-        x:{ min:0, max:maxConso, title:{display:true,text:'Consommation mensuelle (cartouches)',color:'#5B6472',font:{size:11}}, ticks:{color:'#5B6472',font:{size:10}}, grid:{color:'#E4E7EC'} },
+        x:{ min:0, max:maxConso, title:{display:true,text:'Consommation mensuelle (cartouches/mois)',color:'#5B6472',font:{size:11}}, ticks:{color:'#5B6472',font:{size:10}}, grid:{color:'#E4E7EC'} },
         y:{ min:0, max:maxStock, title:{display:true,text:'Stock actuel (cartouches)',color:'#5B6472',font:{size:11}}, ticks:{color:'#5B6472',font:{size:10}}, grid:{color:'#E4E7EC'} }
       },
       plugins:{
-        legend:{display:false},
-        tooltip:{ callbacks:{ label:(c)=>`${c.raw.code} — stock ${c.raw.y.toLocaleString('fr-FR')}, conso ${c.raw.x}/mois, couverture ${c.raw.couverture>=999?'∞':c.raw.couverture.toFixed(1)}m` } }
+        legend:{
+          display:true, position:'bottom',
+          labels:{
+            color:'#5B6472', font:{size:11}, padding:14, boxWidth:10, usePointStyle:true,
+            generateLabels: ()=>[
+              {text:'Critique < 1 mois', fillStyle:statusColor.critique, strokeStyle:statusColor.critique, pointStyle:'circle'},
+              {text:'Faible 1–3 mois', fillStyle:statusColor.faible, strokeStyle:statusColor.faible, pointStyle:'circle'},
+              {text:'Moyen 3–6 mois', fillStyle:statusColor.moyen, strokeStyle:statusColor.moyen, pointStyle:'circle'},
+              {text:'Suffisant > 6 mois', fillStyle:statusColor.suffisant, strokeStyle:statusColor.suffisant, pointStyle:'circle'}
+            ]
+          },
+          onClick:()=>{} // légende informative (zones de risque), non interactive
+        },
+        tooltip:{ callbacks:{ label:(c)=>`${c.raw.code} — stock ${c.raw.y.toLocaleString('fr-FR')} cartouches, conso ${c.raw.x} cartouches/mois, couverture ${c.raw.couverture>=999?'∞':c.raw.couverture.toFixed(1)+' mois'}, resp. ${c.raw.resp}` } }
       }
     },
     plugins:[matrixZonesPlugin, matrixLabelsPlugin]
@@ -986,10 +1247,10 @@ function renderPistoGlobal(){
   const panne = all.filter(p=>p.etat==='panne').length;
   const maint = all.filter(p=>p.etat==='maintenance').length;
   document.getElementById('pistoKpiRow').innerHTML = `
-    <div class="kpi"><div class="bar" style="background:var(--accent-flare)"></div><div class="val">${total}</div><div class="lbl">Pistolets au total</div></div>
-    <div class="kpi"><div class="bar" style="background:var(--status-suffisant)"></div><div class="val">${ok}</div><div class="lbl">Fonctionnels</div></div>
-    <div class="kpi"><div class="bar" style="background:var(--status-moyen)"></div><div class="val">${maint}</div><div class="lbl">En maintenance</div></div>
-    <div class="kpi"><div class="bar" style="background:var(--status-critique)"></div><div class="val">${panne}</div><div class="lbl">En panne</div></div>
+    <div class="kpi"><div class="bar" style="background:var(--accent-flare)"></div><div class="val">${total}<span class="unit-suffix">unités</span></div><div class="lbl">Pistolets au total</div></div>
+    <div class="kpi"><div class="bar" style="background:var(--status-suffisant)"></div><div class="val">${ok}<span class="unit-suffix">unités</span></div><div class="lbl">Fonctionnels</div></div>
+    <div class="kpi"><div class="bar" style="background:var(--status-moyen)"></div><div class="val">${maint}<span class="unit-suffix">unités</span></div><div class="lbl">En maintenance</div></div>
+    <div class="kpi"><div class="bar" style="background:var(--status-critique)"></div><div class="val">${panne}<span class="unit-suffix">unités</span></div><div class="lbl">En panne</div></div>
   `;
   document.getElementById('pistoGlobalBody').innerHTML = all.length ? all.map(p=>`
     <tr>
@@ -1003,6 +1264,153 @@ function renderPistoGlobal(){
       <td>${p.obs||'—'}</td>
     </tr>`).join('') : `<tr><td colspan="8" style="text-align:center;color:var(--text-dim);padding:24px;">Aucun pistolet enregistré pour l'instant. Ajoutez-en depuis l'espace région.</td></tr>`;
 }
+
+/* ============ REFERENCES ============ */
+let REFERENCES = [];
+let refFilter = 'tous';
+let refPendingFile = null; // {name, type, size, dataUrl}
+
+async function loadReferences(){
+  try{
+    const res = await window.storage.get('references-list', true);
+    REFERENCES = res ? JSON.parse(res.value) : [];
+  }catch(e){
+    REFERENCES = [];
+  }
+}
+
+async function saveReferences(){
+  try{
+    await window.storage.set('references-list', JSON.stringify(REFERENCES), true);
+  }catch(e){
+    showToast("Erreur de sauvegarde — réessayez");
+    return false;
+  }
+  return true;
+}
+
+function renderReferences(){
+  const list = document.getElementById('refList');
+  const filtered = refFilter==='tous' ? REFERENCES : REFERENCES.filter(r=>r.category===refFilter);
+
+  document.getElementById('countTous').textContent = REFERENCES.length;
+  document.getElementById('countReg').textContent = REFERENCES.filter(r=>r.category==='reglementaire').length;
+  document.getElementById('countInt').textContent = REFERENCES.filter(r=>r.category==='interne').length;
+
+  if(!filtered.length){
+    list.innerHTML = `<div class="empty-state"><div class="big">Aucune référence</div>Ajoutez un texte réglementaire ou un document interne avec le bouton ci-dessus.</div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.slice().sort((a,b)=> new Date(b.dateAdded)-new Date(a.dateAdded)).map(r=>{
+    const badgeLabel = r.category==='reglementaire' ? 'Réglementaire' : 'Interne';
+    const fileHtml = r.file
+      ? `<a class="ref-file-chip" href="${r.file.dataUrl}" download="${r.file.name}">⬇ ${r.file.name}</a>`
+      : `<span class="ref-no-file">Aucun fichier joint</span>`;
+    const dateStr = new Date(r.dateAdded).toLocaleDateString('fr-FR', {day:'2-digit',month:'short',year:'numeric'});
+    return `
+    <div class="ref-item">
+      <div class="ref-item-main">
+        <div class="ref-item-title">${escapeHtml(r.title)}</div>
+        ${r.description ? `<div class="ref-item-desc">${escapeHtml(r.description)}</div>` : ''}
+        <div class="ref-item-meta">
+          <span class="ref-badge ${r.category}">${badgeLabel}</span>
+          ${r.refNumber ? `<span>${escapeHtml(r.refNumber)}</span>` : ''}
+          <span>Ajouté le ${dateStr}</span>
+          ${fileHtml}
+        </div>
+      </div>
+      <div class="ref-item-actions">
+        <button class="btn danger small" data-del="${r.id}">Supprimer</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('[data-del]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      if(!confirm("Supprimer cette référence ?")) return;
+      REFERENCES = REFERENCES.filter(r=>r.id!==btn.dataset.del);
+      const ok = await saveReferences();
+      if(ok){ showToast("Référence supprimée"); renderReferences(); }
+    });
+  });
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+document.querySelectorAll('.ref-tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.ref-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    refFilter = tab.dataset.filter;
+    renderReferences();
+  });
+});
+
+/* ---- Modal ---- */
+const refModalOverlay = document.getElementById('refModalOverlay');
+function openRefModal(){
+  document.getElementById('refTitle').value = '';
+  document.getElementById('refCategory').value = 'reglementaire';
+  document.getElementById('refNumber').value = '';
+  document.getElementById('refDescription').value = '';
+  document.getElementById('refFileName').textContent = '';
+  document.getElementById('refFileInput').value = '';
+  refPendingFile = null;
+  refModalOverlay.classList.add('show');
+}
+function closeRefModal(){
+  refModalOverlay.classList.remove('show');
+}
+document.getElementById('openRefModal').addEventListener('click', openRefModal);
+document.getElementById('closeRefModal').addEventListener('click', closeRefModal);
+document.getElementById('cancelRefModal').addEventListener('click', closeRefModal);
+refModalOverlay.addEventListener('click', (e)=>{ if(e.target===refModalOverlay) closeRefModal(); });
+
+document.getElementById('refFileDrop').addEventListener('click', ()=>{
+  document.getElementById('refFileInput').click();
+});
+document.getElementById('refFileInput').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  if(file.size > 4*1024*1024){
+    showToast("Fichier trop volumineux (max 4 Mo)");
+    e.target.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    refPendingFile = { name: file.name, type: file.type, size: file.size, dataUrl: reader.result };
+    document.getElementById('refFileName').textContent = file.name;
+  };
+  reader.onerror = ()=>{ showToast("Impossible de lire le fichier"); };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('saveRefBtn').addEventListener('click', async ()=>{
+  const title = document.getElementById('refTitle').value.trim();
+  if(!title){ showToast("Le titre est obligatoire"); return; }
+  const entry = {
+    id: 'ref_' + Date.now() + '_' + Math.random().toString(36).slice(2,8),
+    title,
+    category: document.getElementById('refCategory').value,
+    refNumber: document.getElementById('refNumber').value.trim(),
+    description: document.getElementById('refDescription').value.trim(),
+    dateAdded: new Date().toISOString(),
+    file: refPendingFile
+  };
+  REFERENCES.push(entry);
+  const ok = await saveReferences();
+  if(ok){
+    showToast("Référence ajoutée");
+    closeRefModal();
+    renderReferences();
+  }
+});
 
 /* ============ CLOCK ============ */
 function tickClock(){
@@ -1023,10 +1431,12 @@ setInterval(tickClock, 1000*30);
     });
   }
   await loadAll();
+  await loadReferences();
   tickClock();
   if(chartOk) renderDashboard(); else renderDashboardWithoutCharts();
   regionSelect.value = currentRegion;
   renderRegionPage();
+  renderReferences();
 })();
 
 function renderDashboardWithoutCharts(){
@@ -1038,10 +1448,10 @@ function renderDashboardWithoutCharts(){
   const pistoKo = rows.reduce((s,r)=>s+r.pistoKo,0);
   const critiques = rows.filter(r=>r.statut==='critique').length;
   document.getElementById('kpiRow').innerHTML = `
-    <div class="kpi"><div class="bar" style="background:var(--accent-flare)"></div><div class="val">${REGIONS.length}</div><div class="lbl">Sites suivis</div></div>
-    <div class="kpi"><div class="bar" style="background:var(--status-suffisant)"></div><div class="val">${stockTotal.toLocaleString('fr-FR')}</div><div class="lbl">Cartouches en stock</div></div>
-    <div class="kpi"><div class="bar" style="background:var(--status-critique)"></div><div class="val">${critiques}</div><div class="lbl">Sites en stock critique</div></div>
-    <div class="kpi"><div class="bar" style="background:var(--accent-flare-glow)"></div><div class="val">${pistoTotal}</div><div class="lbl">Pistolets enregistrés</div></div>
+    <div class="kpi"><div class="bar" style="background:var(--accent-flare)"></div><div class="val">${REGIONS.length}<span class="unit-suffix">sites</span></div><div class="lbl">Sites suivis</div></div>
+    <div class="kpi"><div class="bar" style="background:var(--status-suffisant)"></div><div class="val">${stockTotal.toLocaleString('fr-FR')}<span class="unit-suffix">cart.</span></div><div class="lbl">Cartouches en stock</div></div>
+    <div class="kpi"><div class="bar" style="background:var(--status-critique)"></div><div class="val">${critiques}<span class="unit-suffix">sites</span></div><div class="lbl">Sites en stock critique</div></div>
+    <div class="kpi"><div class="bar" style="background:var(--accent-flare-glow)"></div><div class="val">${pistoTotal}<span class="unit-suffix">unités</span></div><div class="lbl">Pistolets enregistrés</div></div>
     <div class="kpi"><div class="bar" style="background:${pistoKo>0?'var(--status-critique)':'var(--status-suffisant)'}"></div><div class="val">${pistoTotal? Math.round(pistoOk/pistoTotal*100):0}%</div><div class="lbl">Pistolets opérationnels</div></div>
   `;
   const maxCouv = Math.max(...rows.map(r=>Math.min(r.couverture,36)), 6);
@@ -1050,7 +1460,7 @@ function renderDashboardWithoutCharts(){
     return `<div class="flare-col">
       <div class="flare-tube"><div class="flare-fill" style="height:${h}px;background:linear-gradient(${statusColor[r.statut]},${statusColor[r.statut]}cc);box-shadow:0 0 10px ${statusColor[r.statut]}66;"></div></div>
       <div class="flare-code">${r.code}</div>
-      <div class="flare-val">${r.couverture>=999?'∞':r.couverture.toFixed(1)}m</div>
+      <div class="flare-val">${r.couverture>=999?'∞':r.couverture.toFixed(1)+' mois'}</div>
     </div>`;
   }).join('');
   const alerts = [];

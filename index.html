@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SENTINEL PLF — Suivi Cartouches &amp; Pistolets Lance-Fusées (PLF)</title>
+<title>SUIVI PAT — Suivi Cartouches &amp; pistolets allume torche (PAT)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script>
@@ -284,7 +284,7 @@ canvas{max-height:230px;}
       <div>
         <div class="brand-name">SONATRACH</div>
         <div class="brand-sub">Division Production</div>
-        <div class="brand-sub">Plateforme PLF</div>
+        <div class="brand-sub">Plateforme PAT</div>
 
       </div>
     </div>
@@ -292,6 +292,8 @@ canvas{max-height:230px;}
       <div class="nav-label">Vue</div>
       <div class="nav-item active" data-page="dashboard"><span class="nav-dot"></span>Tableau de bord — Direction</div>
       <div class="nav-item" data-page="region"><span class="nav-dot"></span>Saisie — Espace Région</div>
+      <div class="nav-label">Point de Transit</div>
+      <div class="nav-item" data-page="transit"><span class="nav-dot"></span>HMD Transite</div>
       <div class="nav-label">Registres</div>
       <div class="nav-item" data-page="cartouches"><span class="nav-dot"></span>Cartouches — vue globale</div>
       <div class="nav-item" data-page="pistolets"><span class="nav-dot"></span>Pistolets — vue globale</div>
@@ -308,7 +310,7 @@ canvas{max-height:230px;}
     <div class="topbar">
       <div>
         <h1 id="pageTitle">Tableau de bord Direction </h1>
-        <div class="sub" id="pageSub">Vue consolidée du stock de cartouches et de l'état du parc de pistolets PLF</div>
+        <div class="sub" id="pageSub">Vue consolidée du stock de cartouches et de l'état du parc de pistolets PAT</div>
       </div>
       <div id="topbarRight"></div>
     </div>
@@ -358,7 +360,7 @@ canvas{max-height:230px;}
             <div class="alert-list" id="alertList"></div>
           </div>
           <div class="panel">
-            <div class="panel-head"><h2>Répartition des statuts des cartouches (sites)</h2></div>
+            <div class="panel-head"><h2>Répartition des statuts (sites)</h2></div>
             <canvas id="chartStatus" style="max-height:200px"></canvas>
           </div>
         </div>
@@ -403,6 +405,28 @@ canvas{max-height:230px;}
             </table>
           </div>
         </div>
+
+        <div class="panel" style="border-top:3px solid var(--accent-flare);">
+          <div class="panel-head">
+            <h2>Point de Transit — HMD Transite</h2>
+            <div class="hint">Réception fournisseurs → expédition vers les régions</div>
+          </div>
+          <div class="kpi-row" id="transitKpiRow" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px;"></div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Flux</th>
+                  <th class="num">Stock en transit</th>
+                  <th class="num">Reçu (fournisseurs)</th>
+                  <th class="num">Expédié (régions)</th>
+                  <th>Dernière MAJ</th>
+                </tr>
+              </thead>
+              <tbody id="transitDashboardBody"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <!-- ============ REGION DATA ENTRY ============ -->
@@ -436,8 +460,8 @@ canvas{max-height:230px;}
         </div>
 
         <div class="tabs">
-          <div class="tab active" data-tab="tab-cart">Cartouches PLF</div>
-          <div class="tab" data-tab="tab-pist">Pistolets lance-fusées (PLF)</div>
+          <div class="tab active" data-tab="tab-cart">Cartouches PAT</div>
+          <div class="tab" data-tab="tab-pist">pistolets allume torche (PAT)</div>
         </div>
 
         <div id="tab-cart">
@@ -450,7 +474,7 @@ canvas{max-height:230px;}
           <div class="panel">
             <div class="panel-head"><h2>Consommation mensuelle estimée</h2><div class="hint">Sert au calcul de couverture</div></div>
             <div class="form-grid" style="grid-template-columns:260px auto;align-items:end;">
-              <div class="field"><label>Consommation mensuelle</label>
+              <div class="field"><label>Consommation mensuelle<br>(Moyenne des 6 derniers mois)</label>
                 <div class="input-unit"><input type="number" id="consoInput" min="0" placeholder="0"><span class="unit-tag">cartouches/mois</span></div>
               </div>
               <button class="btn secondary" id="saveConso">Mettre à jour</button>
@@ -459,7 +483,7 @@ canvas{max-height:230px;}
 
           <div class="two-col-form">
             <div class="panel entree">
-              <div class="panel-head"><h2>Nouvelle entrée</h2><div class="hint">Réf. déjà existante = mise à jour</div></div>
+              <div class="panel-head"><h2>Nouvelle entrée</h2></div>
               <div class="form-grid">
                 <div class="field"><label>Date</label><input type="date" id="eDate"></div>
                 <div class="field"><label>Quantité</label>
@@ -474,7 +498,7 @@ canvas{max-height:230px;}
               <div style="margin-top:14px;"><button class="btn entree" id="addEntree">Enregistrer l'entrée</button></div>
             </div>
             <div class="panel sortie">
-              <div class="panel-head"><h2>Nouvelle sortie</h2><div class="hint">Réf. déjà existante = mise à jour</div></div>
+              <div class="panel-head"><h2>Nouvelle sortie</h2></div>
               <div class="form-grid">
                 <div class="field"><label>Date</label><input type="date" id="sDate"></div>
                 <div class="field"><label>Quantité</label>
@@ -503,16 +527,16 @@ canvas{max-height:230px;}
 
         <div id="tab-pist" style="display:none;">
           <div class="panel entree">
-            <div class="panel-head"><h2>Nouvelle entrée — Pistolet lance-fusées</h2><div class="hint">N° de série déjà existant = mise à jour</div></div>
+            <div class="panel-head"><h2>Nouvelle entrée — pistolets allume torche (PAT)</h2><div class="hint">N° de série déjà existant = mise à jour</div></div>
             <div class="form-grid">
-              <div class="field"><label>N° de série</label><input type="text" id="pSerie" placeholder="Ex: PLF-2024-018"></div>
+              <div class="field"><label>N° de série</label><input type="text" id="pSerie" placeholder="Ex: PAT-2024-018"></div>
               <div class="field"><label>Marque / Modèle</label><input type="text" id="pModele" placeholder="Ex: Cerbérus 2000"></div>
               <div class="field"><label>État</label>
                 <select id="pEtat">
                   <option value="fonctionnel">Fonctionnel</option>
                   <option value="maintenance">En maintenance</option>
                   <option value="panne">En panne</option>
-                  <option value="reforme">Réformé</option>
+                  <option value="reforme">Obsolète</option>
                 </select>
               </div>
               <div class="field"><label>Dernier contrôle</label><input type="date" id="pDernier"></div>
@@ -540,10 +564,130 @@ canvas{max-height:230px;}
         </div>
       </div>
 
+      <!-- ============ TRANSIT POINT — HMD TRANSITE ============ -->
+      <div class="page" id="page-transit">
+        <div class="panel" style="margin-bottom:18px;">
+          <div class="panel-head"><h2>Responsable du point de transit</h2><div class="hint">Contact référent HMD Transite</div></div>
+          <div class="responsables-grid">
+            <div class="field">
+              <label>Responsable du point de transit</label>
+              <input type="text" id="transitResponsable" placeholder="Nom et prénom">
+            </div>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <div class="tab active" data-transit-tab="ttab-cart">Cartouches PAT</div>
+          <div class="tab" data-transit-tab="ttab-pist">Pistolets allume torche (PAT)</div>
+        </div>
+
+        <div id="ttab-cart">
+          <div class="grid-3" style="margin-bottom:18px;">
+            <div class="kpi"><div class="bar" style="background:var(--accent-flare)"></div><div class="val" id="tCartStock">–</div><div class="lbl">Stock cartouches en transit</div></div>
+            <div class="kpi"><div class="bar" style="background:var(--color-entree)"></div><div class="val" id="tCartRecu">–</div><div class="lbl">Total reçu (fournisseurs)</div></div>
+            <div class="kpi"><div class="bar" style="background:var(--color-sortie)"></div><div class="val" id="tCartExp">–</div><div class="lbl">Total expédié (régions)</div></div>
+          </div>
+
+          <div class="two-col-form">
+            <div class="panel entree">
+              <div class="panel-head"><h2>Réception depuis un fournisseur</h2></div>
+              <div class="form-grid">
+                <div class="field"><label>Date</label><input type="date" id="tcDate"></div>
+                <div class="field"><label>Quantité</label>
+                  <div class="input-unit"><input type="number" id="tcQty" min="1" placeholder="0"><span class="unit-tag">cartouches</span></div>
+                </div>
+                <div class="field"><label>Fournisseur</label><input type="text" id="tcFournisseur" placeholder="Ex: Fournisseur ABC"></div>
+                <div class="field"><label>N° Bon / Référence</label><input type="text" id="tcRef" placeholder="Ex: BR-2026-014"></div>
+                <div class="field"><label>Responsable</label><input type="text" id="tcResp" placeholder="Nom et prénom"></div>
+                <div class="field" style="grid-column:1/-1;"><label>Observations</label><input type="text" id="tcObs"></div>
+              </div>
+              <div class="field-hint">Si la référence saisie correspond à une réception existante, celle-ci sera mise à jour au lieu d'être dupliquée.</div>
+              <div style="margin-top:14px;"><button class="btn entree" id="addTransitCartEntree">Enregistrer la réception</button></div>
+            </div>
+            <div class="panel sortie">
+              <div class="panel-head"><h2>Expédition vers une région</h2></div>
+              <div class="form-grid">
+                <div class="field"><label>Date</label><input type="date" id="tcExpDate"></div>
+                <div class="field"><label>Quantité</label>
+                  <div class="input-unit"><input type="number" id="tcExpQty" min="1" placeholder="0"><span class="unit-tag">cartouches</span></div>
+                </div>
+                <div class="field"><label>Région destinataire</label><select id="tcExpRegion"></select></div>
+                <div class="field"><label>N° Bon / Référence</label><input type="text" id="tcExpRef" placeholder="Ex: BS-2026-007"></div>
+                <div class="field"><label>Responsable</label><input type="text" id="tcExpResp" placeholder="Nom et prénom"></div>
+                <div class="field" style="grid-column:1/-1;"><label>Observations</label><input type="text" id="tcExpObs"></div>
+              </div>
+              <div class="field-hint">Si la référence saisie correspond à une expédition existante, celle-ci sera mise à jour au lieu d'être dupliquée.</div>
+              <div style="margin-top:14px;"><button class="btn sortie" id="addTransitCartSortie">Enregistrer l'expédition</button></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h2>Historique du point de transit — Cartouches</h2></div>
+            <div style="overflow-x:auto;">
+              <table>
+                <thead><tr><th>Date</th><th>Mouvement</th><th class="num">Quantité (cartouches)</th><th>Référence</th><th>Fournisseur / Région</th><th>Responsable</th><th>Observations</th></tr></thead>
+                <tbody id="transitCartHistoryBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="ttab-pist" style="display:none;">
+          <div class="grid-3" style="margin-bottom:18px;">
+            <div class="kpi"><div class="bar" style="background:var(--accent-flare)"></div><div class="val" id="tPistStock">–</div><div class="lbl">Pistolets en transit</div></div>
+            <div class="kpi"><div class="bar" style="background:var(--color-entree)"></div><div class="val" id="tPistRecu">–</div><div class="lbl">Total reçu (fournisseurs)</div></div>
+            <div class="kpi"><div class="bar" style="background:var(--color-sortie)"></div><div class="val" id="tPistExp">–</div><div class="lbl">Total expédié (régions)</div></div>
+          </div>
+
+          <div class="two-col-form">
+            <div class="panel entree">
+              <div class="panel-head"><h2>Réception depuis un fournisseur</h2></div>
+              <div class="form-grid">
+                <div class="field"><label>Date</label><input type="date" id="tpDate"></div>
+                <div class="field"><label>Quantité</label>
+                  <div class="input-unit"><input type="number" id="tpQty" min="1" placeholder="0"><span class="unit-tag">pistolets</span></div>
+                </div>
+                <div class="field"><label>Fournisseur</label><input type="text" id="tpFournisseur" placeholder="Ex: Fournisseur ABC"></div>
+                <div class="field"><label>N° Bon / Référence</label><input type="text" id="tpRef" placeholder="Ex: BR-2026-014"></div>
+                <div class="field"><label>Responsable</label><input type="text" id="tpResp" placeholder="Nom et prénom"></div>
+                <div class="field" style="grid-column:1/-1;"><label>Observations</label><input type="text" id="tpObs"></div>
+              </div>
+              <div class="field-hint">Si la référence saisie correspond à une réception existante, celle-ci sera mise à jour au lieu d'être dupliquée.</div>
+              <div style="margin-top:14px;"><button class="btn entree" id="addTransitPistEntree">Enregistrer la réception</button></div>
+            </div>
+            <div class="panel sortie">
+              <div class="panel-head"><h2>Expédition vers une région</h2></div>
+              <div class="form-grid">
+                <div class="field"><label>Date</label><input type="date" id="tpExpDate"></div>
+                <div class="field"><label>Quantité</label>
+                  <div class="input-unit"><input type="number" id="tpExpQty" min="1" placeholder="0"><span class="unit-tag">pistolets</span></div>
+                </div>
+                <div class="field"><label>Région destinataire</label><select id="tpExpRegion"></select></div>
+                <div class="field"><label>N° Bon / Référence</label><input type="text" id="tpExpRef" placeholder="Ex: BS-2026-007"></div>
+                <div class="field"><label>Responsable</label><input type="text" id="tpExpResp" placeholder="Nom et prénom"></div>
+                <div class="field" style="grid-column:1/-1;"><label>Observations</label><input type="text" id="tpExpObs"></div>
+              </div>
+              <div class="field-hint">Si la référence saisie correspond à une expédition existante, celle-ci sera mise à jour au lieu d'être dupliquée.</div>
+              <div style="margin-top:14px;"><button class="btn sortie" id="addTransitPistSortie">Enregistrer l'expédition</button></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h2>Historique du point de transit — Pistolets</h2></div>
+            <div style="overflow-x:auto;">
+              <table>
+                <thead><tr><th>Date</th><th>Mouvement</th><th class="num">Quantité (pistolets)</th><th>Référence</th><th>Fournisseur / Région</th><th>Responsable</th><th>Observations</th></tr></thead>
+                <tbody id="transitPistHistoryBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- ============ GLOBAL CARTOUCHES ============ -->
       <div class="page" id="page-cartouches">
         <div class="panel">
-          <div class="panel-head"><h2>Registre consolidé — Cartouches PLF</h2></div>
+          <div class="panel-head"><h2>Registre consolidé — Cartouches PAT</h2></div>
           <div style="overflow-x:auto;">
             <table>
               <thead><tr><th>Région</th><th class="num">Stock initial (u)</th><th class="num">Entrées (u)</th><th class="num">Sorties (u)</th><th class="num">Stock actuel (u)</th><th class="num">Conso. (cartouches/mois)</th><th class="num">Couverture (mois)</th><th>Statut</th></tr></thead>
@@ -557,7 +701,7 @@ canvas{max-height:230px;}
       <div class="page" id="page-pistolets">
         <div class="kpi-row" id="pistoKpiRow" style="grid-template-columns:repeat(4,1fr);"></div>
         <div class="panel">
-          <div class="panel-head"><h2>Registre consolidé — Pistolets lance-fusées (PLF)</h2></div>
+          <div class="panel-head"><h2>Registre consolidé — pistolets allume torche (PAT)</h2></div>
           <div style="overflow-x:auto;">
             <table>
               <thead><tr><th>Région</th><th>N° Série</th><th>Modèle</th><th>État</th><th>Dernier contrôle</th><th>Prochain contrôle</th><th>Responsable</th><th>Observations</th></tr></thead>
@@ -608,7 +752,7 @@ canvas{max-height:230px;}
       </div>
       <div class="field">
         <label>N° de référence / code</label>
-        <input type="text" id="refNumber" placeholder="Ex : PLF-INT-2026-014">
+        <input type="text" id="refNumber" placeholder="Ex : PAT-INT-2026-014">
       </div>
       <div class="field">
         <label>Description</label>
@@ -666,7 +810,7 @@ function statusOf(couverture){
   return "suffisant";
 }
 const statusLabel = {critique:"Critique (< 1 mois)",faible:"Faible (1-3 mois)",moyen:"Moyen (3-6 mois)",suffisant:"Suffisant (> 6 mois)"};
-const etatLabel = {fonctionnel:"Fonctionnel",panne:"En panne",maintenance:"En maintenance",reforme:"Réformé"};
+const etatLabel = {fonctionnel:"Fonctionnel",panne:"En panne",maintenance:"En maintenance",reforme:"Obsolète"};
 const etatClass = {fonctionnel:"fonctionnel",panne:"panne",maintenance:"maintenance",reforme:"reforme"};
 
 function computeCart(c){
@@ -709,6 +853,42 @@ async function saveRegion(code){
 
 async function loadAll(){
   await Promise.all(REGIONS.map(c=>loadRegion(c)));
+  await loadTransit();
+}
+
+/* ============ TRANSIT POINT — HMD TRANSITE ============ */
+let TRANSIT = null;
+
+function computeTransitFlux(f){
+  const recuQty = f.entreesFournisseurs.reduce((s,e)=>s+Number(e.qty||0),0);
+  const expQty = f.expeditions.reduce((s,e)=>s+Number(e.qty||0),0);
+  return { recuQty, expQty, stock: recuQty - expQty };
+}
+
+async function loadTransit(){
+  try{
+    const res = await window.storage.get('transit-data:HMD_TRANSITE', true);
+    if(res && res.value){
+      TRANSIT = JSON.parse(res.value);
+      return TRANSIT;
+    }
+  }catch(e){ /* not found, fall through to seed */ }
+  TRANSIT = {
+    responsable: "",
+    cartouches: { entreesFournisseurs: [], expeditions: [] },
+    pistolets: { entreesFournisseurs: [], expeditions: [] },
+    lastUpdate: null
+  };
+  try{ await window.storage.set('transit-data:HMD_TRANSITE', JSON.stringify(TRANSIT), true); }catch(e){}
+  return TRANSIT;
+}
+
+async function saveTransit(){
+  TRANSIT.lastUpdate = new Date().toISOString();
+  try{
+    await window.storage.set('transit-data:HMD_TRANSITE', JSON.stringify(TRANSIT), true);
+  }catch(e){ showToast("Erreur de sauvegarde — réessayez"); return false; }
+  return true;
 }
 
 function showToast(msg){
@@ -727,15 +907,17 @@ document.querySelectorAll('.nav-item').forEach(item=>{
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     document.getElementById('page-'+page).classList.add('active');
     const titles = {
-      dashboard:["Tableau de bord Direction","Vue consolidée du stock de cartouches et de l'état du parc de pistolets PLF"],
+      dashboard:["Tableau de bord Direction","Vue consolidée du stock de cartouches et de l'état du parc de pistolets PAT"],
       region:["Espace Région — Saisie","Renseignez les mouvements de cartouches et l'état du parc de pistolets de votre site"],
+      transit:["Point de Transit — HMD Transite","Réception depuis les fournisseurs et expédition vers les régions"],
       cartouches:["Registre global — Cartouches","Vue consolidée de tous les sites"],
-      pistolets:["Registre global — Pistolets","Vue consolidée du parc de pistolets lance-fusées (PLF)"],
-      references:["Références réglementaires & internes","Textes réglementaires, procédures et documents internes liés aux PLF"]
+      pistolets:["Registre global — Pistolets","Vue consolidée du parc de pistolets allume torche (PAT)"],
+      references:["Références réglementaires & internes","Textes réglementaires, procédures et documents internes liés aux PAT"]
     };
     document.getElementById('pageTitle').textContent = titles[page][0];
     document.getElementById('pageSub').textContent = titles[page][1];
     if(page==='dashboard'){ (window.__lastChartOk!==false) ? renderDashboard() : renderDashboardWithoutCharts(); }
+    if(page==='transit') renderTransitPage();
     if(page==='cartouches') renderCartGlobal();
     if(page==='pistolets') renderPistoGlobal();
     if(page==='references') renderReferences();
@@ -748,6 +930,15 @@ document.querySelectorAll('.tab').forEach(tab=>{
     tab.classList.add('active');
     document.getElementById('tab-cart').style.display = tab.dataset.tab==='tab-cart' ? 'block':'none';
     document.getElementById('tab-pist').style.display = tab.dataset.tab==='tab-pist' ? 'block':'none';
+  });
+});
+
+document.querySelectorAll('[data-transit-tab]').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('[data-transit-tab]').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('ttab-cart').style.display = tab.dataset.transitTab==='ttab-cart' ? 'block':'none';
+    document.getElementById('ttab-pist').style.display = tab.dataset.transitTab==='ttab-pist' ? 'block':'none';
   });
 });
 
@@ -913,6 +1104,191 @@ document.getElementById('addPistolet').addEventListener('click', async ()=>{
   renderPistoletTable();
 });
 
+/* ============ TRANSIT PAGE — HMD TRANSITE ============ */
+const tcExpRegionSelect = document.getElementById('tcExpRegion');
+const tpExpRegionSelect = document.getElementById('tpExpRegion');
+[tcExpRegionSelect, tpExpRegionSelect].forEach(sel=>{
+  REGIONS.forEach(r=>{
+    const opt = document.createElement('option');
+    opt.value = r; opt.textContent = r;
+    sel.appendChild(opt);
+  });
+});
+
+document.getElementById('transitResponsable').addEventListener('change', async (e)=>{
+  TRANSIT.responsable = e.target.value;
+  await saveTransit();
+  showToast("Responsable du point de transit mis à jour");
+});
+
+function renderTransitPage(){
+  document.getElementById('transitResponsable').value = TRANSIT.responsable || "";
+
+  const cFlux = computeTransitFlux(TRANSIT.cartouches);
+  document.getElementById('tCartStock').textContent = cFlux.stock.toLocaleString('fr-FR');
+  document.getElementById('tCartRecu').textContent = cFlux.recuQty.toLocaleString('fr-FR');
+  document.getElementById('tCartExp').textContent = cFlux.expQty.toLocaleString('fr-FR');
+
+  const pFlux = computeTransitFlux(TRANSIT.pistolets);
+  document.getElementById('tPistStock').textContent = pFlux.stock.toLocaleString('fr-FR');
+  document.getElementById('tPistRecu').textContent = pFlux.recuQty.toLocaleString('fr-FR');
+  document.getElementById('tPistExp').textContent = pFlux.expQty.toLocaleString('fr-FR');
+
+  const cRows = [];
+  TRANSIT.cartouches.entreesFournisseurs.forEach(e=>cRows.push({...e,type:'Réception'}));
+  TRANSIT.cartouches.expeditions.forEach(e=>cRows.push({...e,type:'Expédition'}));
+  cRows.sort((a,b)=> (b.date||'').localeCompare(a.date||''));
+  const cb = document.getElementById('transitCartHistoryBody');
+  cb.innerHTML = cRows.length ? cRows.map(r=>`
+    <tr>
+      <td class="mono">${r.date||'—'}</td>
+      <td><span class="chip ${r.type==='Réception'?'suffisant':'faible'}">${r.type}</span></td>
+      <td class="num mono">${r.type==='Réception'?'+':'-'}${r.qty}</td>
+      <td>${r.ref||'—'}</td>
+      <td>${r.fournisseur||r.region||'—'}</td>
+      <td>${r.resp||'—'}</td>
+      <td>${r.obs||'—'}</td>
+    </tr>`).join('') : `<tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:24px;">Aucun mouvement enregistré pour le point de transit.</td></tr>`;
+
+  const pRows = [];
+  TRANSIT.pistolets.entreesFournisseurs.forEach(e=>pRows.push({...e,type:'Réception'}));
+  TRANSIT.pistolets.expeditions.forEach(e=>pRows.push({...e,type:'Expédition'}));
+  pRows.sort((a,b)=> (b.date||'').localeCompare(a.date||''));
+  const pb = document.getElementById('transitPistHistoryBody');
+  pb.innerHTML = pRows.length ? pRows.map(r=>`
+    <tr>
+      <td class="mono">${r.date||'—'}</td>
+      <td><span class="chip ${r.type==='Réception'?'suffisant':'faible'}">${r.type}</span></td>
+      <td class="num mono">${r.type==='Réception'?'+':'-'}${r.qty}</td>
+      <td>${r.ref||'—'}</td>
+      <td>${r.fournisseur||r.region||'—'}</td>
+      <td>${r.resp||'—'}</td>
+      <td>${r.obs||'—'}</td>
+    </tr>`).join('') : `<tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:24px;">Aucun mouvement enregistré pour le point de transit.</td></tr>`;
+}
+
+document.getElementById('addTransitCartEntree').addEventListener('click', async ()=>{
+  const qty = Number(document.getElementById('tcQty').value);
+  if(!qty || qty<=0){ showToast("Indiquez une quantité valide (en cartouches)"); return; }
+  const ref = document.getElementById('tcRef').value.trim();
+  const payload = {
+    date:document.getElementById('tcDate').value || new Date().toISOString().slice(0,10),
+    qty, ref, fournisseur:document.getElementById('tcFournisseur').value,
+    resp:document.getElementById('tcResp').value, obs:document.getElementById('tcObs').value
+  };
+  const entrees = TRANSIT.cartouches.entreesFournisseurs;
+  const existing = ref ? entrees.find(e=>(e.ref||'').trim().toLowerCase()===ref.toLowerCase()) : null;
+  if(existing){
+    Object.assign(existing, payload);
+    showToast("Réception mise à jour (référence existante : "+ref+")");
+  }else{
+    entrees.push({ id:uid(), ...payload });
+    showToast("Réception enregistrée");
+  }
+  await saveTransit();
+  ['tcDate','tcQty','tcFournisseur','tcRef','tcResp','tcObs'].forEach(id=>document.getElementById(id).value='');
+  renderTransitPage();
+});
+
+document.getElementById('addTransitCartSortie').addEventListener('click', async ()=>{
+  const qty = Number(document.getElementById('tcExpQty').value);
+  if(!qty || qty<=0){ showToast("Indiquez une quantité valide (en cartouches)"); return; }
+  const ref = document.getElementById('tcExpRef').value.trim();
+  const payload = {
+    date:document.getElementById('tcExpDate').value || new Date().toISOString().slice(0,10),
+    qty, ref, region:document.getElementById('tcExpRegion').value,
+    resp:document.getElementById('tcExpResp').value, obs:document.getElementById('tcExpObs').value
+  };
+  const expeditions = TRANSIT.cartouches.expeditions;
+  const existing = ref ? expeditions.find(e=>(e.ref||'').trim().toLowerCase()===ref.toLowerCase()) : null;
+  if(existing){
+    Object.assign(existing, payload);
+    showToast("Expédition mise à jour (référence existante : "+ref+")");
+  }else{
+    expeditions.push({ id:uid(), ...payload });
+    showToast("Expédition enregistrée");
+  }
+  await saveTransit();
+  ['tcExpDate','tcExpQty','tcExpRef','tcExpResp','tcExpObs'].forEach(id=>document.getElementById(id).value='');
+  renderTransitPage();
+});
+
+document.getElementById('addTransitPistEntree').addEventListener('click', async ()=>{
+  const qty = Number(document.getElementById('tpQty').value);
+  if(!qty || qty<=0){ showToast("Indiquez une quantité valide (en pistolets)"); return; }
+  const ref = document.getElementById('tpRef').value.trim();
+  const payload = {
+    date:document.getElementById('tpDate').value || new Date().toISOString().slice(0,10),
+    qty, ref, fournisseur:document.getElementById('tpFournisseur').value,
+    resp:document.getElementById('tpResp').value, obs:document.getElementById('tpObs').value
+  };
+  const entrees = TRANSIT.pistolets.entreesFournisseurs;
+  const existing = ref ? entrees.find(e=>(e.ref||'').trim().toLowerCase()===ref.toLowerCase()) : null;
+  if(existing){
+    Object.assign(existing, payload);
+    showToast("Réception mise à jour (référence existante : "+ref+")");
+  }else{
+    entrees.push({ id:uid(), ...payload });
+    showToast("Réception enregistrée");
+  }
+  await saveTransit();
+  ['tpDate','tpQty','tpFournisseur','tpRef','tpResp','tpObs'].forEach(id=>document.getElementById(id).value='');
+  renderTransitPage();
+});
+
+document.getElementById('addTransitPistSortie').addEventListener('click', async ()=>{
+  const qty = Number(document.getElementById('tpExpQty').value);
+  if(!qty || qty<=0){ showToast("Indiquez une quantité valide (en pistolets)"); return; }
+  const ref = document.getElementById('tpExpRef').value.trim();
+  const payload = {
+    date:document.getElementById('tpExpDate').value || new Date().toISOString().slice(0,10),
+    qty, ref, region:document.getElementById('tpExpRegion').value,
+    resp:document.getElementById('tpExpResp').value, obs:document.getElementById('tpExpObs').value
+  };
+  const expeditions = TRANSIT.pistolets.expeditions;
+  const existing = ref ? expeditions.find(e=>(e.ref||'').trim().toLowerCase()===ref.toLowerCase()) : null;
+  if(existing){
+    Object.assign(existing, payload);
+    showToast("Expédition mise à jour (référence existante : "+ref+")");
+  }else{
+    expeditions.push({ id:uid(), ...payload });
+    showToast("Expédition enregistrée");
+  }
+  await saveTransit();
+  ['tpExpDate','tpExpQty','tpExpRef','tpExpResp','tpExpObs'].forEach(id=>document.getElementById(id).value='');
+  renderTransitPage();
+});
+
+function renderTransitDashboardPanel(){
+  const cFlux = computeTransitFlux(TRANSIT.cartouches);
+  const pFlux = computeTransitFlux(TRANSIT.pistolets);
+  const majStr = TRANSIT.lastUpdate ? new Date(TRANSIT.lastUpdate).toLocaleDateString('fr-FR') : '—';
+
+  document.getElementById('transitKpiRow').innerHTML = `
+    <div class="kpi"><div class="bar" style="background:var(--accent-flare)"></div><div class="val">${cFlux.stock.toLocaleString('fr-FR')}<span class="unit-suffix">cart.</span></div><div class="lbl">Cartouches en transit</div></div>
+    <div class="kpi"><div class="bar" style="background:var(--color-entree)"></div><div class="val">${cFlux.recuQty.toLocaleString('fr-FR')}<span class="unit-suffix">cart.</span></div><div class="lbl">Reçu des fournisseurs</div></div>
+    <div class="kpi"><div class="bar" style="background:var(--color-sortie)"></div><div class="val">${cFlux.expQty.toLocaleString('fr-FR')}<span class="unit-suffix">cart.</span></div><div class="lbl">Expédié vers régions</div></div>
+    <div class="kpi"><div class="bar" style="background:var(--accent-flare-glow)"></div><div class="val">${pFlux.stock.toLocaleString('fr-FR')}<span class="unit-suffix">unités</span></div><div class="lbl">Pistolets en transit</div></div>
+  `;
+
+  document.getElementById('transitDashboardBody').innerHTML = `
+    <tr>
+      <td><strong>Cartouches</strong></td>
+      <td class="num mono">${cFlux.stock.toLocaleString('fr-FR')}</td>
+      <td class="num mono">${cFlux.recuQty.toLocaleString('fr-FR')}</td>
+      <td class="num mono">${cFlux.expQty.toLocaleString('fr-FR')}</td>
+      <td class="mono" style="font-size:11px;color:var(--text-dim);">${majStr}</td>
+    </tr>
+    <tr>
+      <td><strong>Pistolets</strong></td>
+      <td class="num mono">${pFlux.stock.toLocaleString('fr-FR')}</td>
+      <td class="num mono">${pFlux.recuQty.toLocaleString('fr-FR')}</td>
+      <td class="num mono">${pFlux.expQty.toLocaleString('fr-FR')}</td>
+      <td class="mono" style="font-size:11px;color:var(--text-dim);">${majStr}</td>
+    </tr>
+  `;
+}
+
 /* ============ DASHBOARD ============ */
 function allComputed(){
   return REGIONS.map(code=>{
@@ -1023,7 +1399,7 @@ function renderDashboard(){
   const pistoCounts = { fonctionnel:rows.reduce((s,r)=>s+r.pistoOk,0), maintenance:rows.reduce((s,r)=>s+r.pistoMaint,0), panne:pistoKo, reforme: pistoTotal - pistoOk - pistoKo - rows.reduce((s,r)=>s+r.pistoMaint,0) };
   charts.pisto = new Chart(ctx2, {
     type:'doughnut',
-    data:{ labels:['Fonctionnel','Maintenance','En panne','Réformé'], datasets:[{ data:[pistoCounts.fonctionnel,pistoCounts.maintenance,pistoCounts.panne,Math.max(pistoCounts.reforme,0)], backgroundColor:['#3DAE73','#E8C547','#E5484D','#5B6472'], borderWidth:0 }]},
+    data:{ labels:['Fonctionnel','Maintenance','En panne','Obsolète'], datasets:[{ data:[pistoCounts.fonctionnel,pistoCounts.maintenance,pistoCounts.panne,Math.max(pistoCounts.reforme,0)], backgroundColor:['#3DAE73','#E8C547','#E5484D','#5B6472'], borderWidth:0 }]},
     options:{
       plugins:{
         legend:{position:'bottom',labels:{color:'#5B6472',font:{size:11},padding:14}},
@@ -1188,6 +1564,9 @@ function renderDashboard(){
 
   // master table
   renderMasterTable(rows);
+
+  // point de transit — HMD Transite
+  renderTransitDashboardPanel();
 }
 
 let sortState = {k:'region', dir:1};
@@ -1475,6 +1854,7 @@ function renderDashboardWithoutCharts(){
     <div class="alert-item"><div><div class="who">${a.who}</div><div class="desc">${a.desc}</div></div><span class="chip critique">Action requise</span></div>
   `).join('') : `<div class="empty-state"><div class="big">Aucune alerte active</div><div>Tous les sites sont dans les seuils attendus.</div></div>`;
   renderMasterTable(rows);
+  renderTransitDashboardPanel();
 }
 </script>
 </body>

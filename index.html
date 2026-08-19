@@ -445,14 +445,6 @@ canvas{max-height:230px;}
           <div class="panel-head"><h2>Responsables du site</h2><div class="hint">Contacts référents — mis à jour automatiquement à la saisie</div></div>
           <div class="responsables-grid">
             <div class="field">
-              <label>Responsable du site</label>
-              <input type="text" id="responsableSite" placeholder="Nom et prénom">
-            </div>
-            <div class="field">
-              <label>Directeur régional</label>
-              <input type="text" id="directeurRegional" placeholder="Nom et prénom">
-            </div>
-            <div class="field">
               <label>Responsable HSE</label>
               <input type="text" id="responsableHSE" placeholder="Nom et prénom">
             </div>
@@ -489,7 +481,7 @@ canvas{max-height:230px;}
                 <div class="field"><label>Quantité</label>
                   <div class="input-unit"><input type="number" id="eQty" min="1" placeholder="0"><span class="unit-tag">cartouches</span></div>
                 </div>
-                <div class="field"><label>N° Bon / Référence</label><input type="text" id="eRef" placeholder="Ex: BR-2026-014"></div>
+                <div class="field"><label>N° de décharge</label><input type="text" id="eRef" placeholder="Ex: BR-2026-014"></div>
                 <div class="field"><label>Fournisseur / Provenance</label><input type="text" id="eProv" placeholder="Ex: Dépôt central"></div>
                 <div class="field"><label>Responsable</label><input type="text" id="eResp" placeholder="Nom et prénom"></div>
                 <div class="field" style="grid-column:1/-1;"><label>Observations</label><input type="text" id="eObs"></div>
@@ -504,7 +496,7 @@ canvas{max-height:230px;}
                 <div class="field"><label>Quantité</label>
                   <div class="input-unit"><input type="number" id="sQty" min="1" placeholder="0"><span class="unit-tag">cartouches</span></div>
                 </div>
-                <div class="field"><label>N° Bon / Référence</label><input type="text" id="sRef" placeholder="Ex: BS-2026-007"></div>
+                <div class="field"><label>N° de décharge</label><input type="text" id="sRef" placeholder="Ex: BS-2026-007"></div>
                 <div class="field"><label>Destinataire / Motif</label><input type="text" id="sDest" placeholder="Ex: Exercice sécurité"></div>
                 <div class="field"><label>Responsable</label><input type="text" id="sResp" placeholder="Nom et prénom"></div>
                 <div class="field" style="grid-column:1/-1;"><label>Observations</label><input type="text" id="sObs"></div>
@@ -539,8 +531,6 @@ canvas{max-height:230px;}
                   <option value="reforme">Obsolète</option>
                 </select>
               </div>
-              <div class="field"><label>Dernier contrôle</label><input type="date" id="pDernier"></div>
-              <div class="field"><label>Prochain contrôle</label><input type="date" id="pProchain"></div>
               <div class="field"><label>Responsable</label><input type="text" id="pResp" placeholder="Nom et prénom"></div>
               <div class="field" style="grid-column:1/-1;"><label>Observations</label><input type="text" id="pObs"></div>
             </div>
@@ -552,7 +542,7 @@ canvas{max-height:230px;}
             <div class="panel-head"><h2>Parc de pistolets du site</h2><div class="hint" id="pistoCountHint"></div></div>
             <div style="overflow-x:auto;">
               <table>
-                <thead><tr><th>N° Série</th><th>Modèle</th><th>État</th><th>Dernier contrôle</th><th>Prochain contrôle</th><th>Responsable</th><th>Observations</th><th></th></tr></thead>
+                <thead><tr><th>N° Série</th><th>Modèle</th><th>État</th><th>Responsable</th><th>Observations</th><th></th></tr></thead>
                 <tbody id="pistoletBody"></tbody>
               </table>
             </div>
@@ -597,7 +587,7 @@ canvas{max-height:230px;}
                   <div class="input-unit"><input type="number" id="tcQty" min="1" placeholder="0"><span class="unit-tag">cartouches</span></div>
                 </div>
                 <div class="field"><label>Fournisseur</label><input type="text" id="tcFournisseur" placeholder="Ex: Fournisseur ABC"></div>
-                <div class="field"><label>N° Bon / Référence</label><input type="text" id="tcRef" placeholder="Ex: BR-2026-014"></div>
+                <div class="field"><label>N° de décharge</label><input type="text" id="tcRef" placeholder="Ex: BR-2026-014"></div>
                 <div class="field"><label>Responsable</label><input type="text" id="tcResp" placeholder="Nom et prénom"></div>
                 <div class="field" style="grid-column:1/-1;"><label>Observations</label><input type="text" id="tcObs"></div>
               </div>
@@ -612,7 +602,7 @@ canvas{max-height:230px;}
                   <div class="input-unit"><input type="number" id="tcExpQty" min="1" placeholder="0"><span class="unit-tag">cartouches</span></div>
                 </div>
                 <div class="field"><label>Région destinataire</label><select id="tcExpRegion"></select></div>
-                <div class="field"><label>N° Bon / Référence</label><input type="text" id="tcExpRef" placeholder="Ex: BS-2026-007"></div>
+                <div class="field"><label>N° de décharge</label><input type="text" id="tcExpRef" placeholder="Ex: BS-2026-007"></div>
                 <div class="field"><label>Responsable</label><input type="text" id="tcExpResp" placeholder="Nom et prénom"></div>
                 <div class="field" style="grid-column:1/-1;"><label>Observations</label><input type="text" id="tcExpObs"></div>
               </div>
@@ -648,7 +638,7 @@ canvas{max-height:230px;}
                   <div class="input-unit"><input type="number" id="tpQty" min="1" placeholder="0"><span class="unit-tag">pistolets</span></div>
                 </div>
                 <div class="field"><label>Fournisseur</label><input type="text" id="tpFournisseur" placeholder="Ex: Fournisseur ABC"></div>
-                <div class="field"><label>N° Bon / Référence</label><input type="text" id="tpRef" placeholder="Ex: BR-2026-014"></div>
+                <div class="field"><label>N° de décharge</label><input type="text" id="tpRef" placeholder="Ex: BR-2026-014"></div>
                 <div class="field"><label>Responsable</label><input type="text" id="tpResp" placeholder="Nom et prénom"></div>
                 <div class="field" style="grid-column:1/-1;"><label>Observations</label><input type="text" id="tpObs"></div>
               </div>
@@ -663,7 +653,7 @@ canvas{max-height:230px;}
                   <div class="input-unit"><input type="number" id="tpExpQty" min="1" placeholder="0"><span class="unit-tag">pistolets</span></div>
                 </div>
                 <div class="field"><label>Région destinataire</label><select id="tpExpRegion"></select></div>
-                <div class="field"><label>N° Bon / Référence</label><input type="text" id="tpExpRef" placeholder="Ex: BS-2026-007"></div>
+                <div class="field"><label>N° de décharge</label><input type="text" id="tpExpRef" placeholder="Ex: BS-2026-007"></div>
                 <div class="field"><label>Responsable</label><input type="text" id="tpExpResp" placeholder="Nom et prénom"></div>
                 <div class="field" style="grid-column:1/-1;"><label>Observations</label><input type="text" id="tpExpObs"></div>
               </div>
@@ -704,7 +694,7 @@ canvas{max-height:230px;}
           <div class="panel-head"><h2>Registre consolidé — pistolets allume torche (PAT)</h2></div>
           <div style="overflow-x:auto;">
             <table>
-              <thead><tr><th>Région</th><th>N° Série</th><th>Modèle</th><th>État</th><th>Dernier contrôle</th><th>Prochain contrôle</th><th>Responsable</th><th>Observations</th></tr></thead>
+              <thead><tr><th>Région</th><th>N° Série</th><th>Modèle</th><th>État</th><th>Responsable</th><th>Observations</th></tr></thead>
               <tbody id="pistoGlobalBody"></tbody>
             </table>
           </div>
@@ -797,7 +787,7 @@ const SEED = {
   INAS:  {stockInitial:1000, conso:20,  entrees:[], sorties:[]},
 };
 
-let STATE = {};   // { CODE: { cartouches:{stockInitial,conso,entrees,sorties}, pistolets:[...], responsableSite, lastUpdate } }
+let STATE = {};   // { CODE: { cartouches:{stockInitial,conso,entrees,sorties}, pistolets:[...], responsableHSE, lastUpdate } }
 let currentRegion = REGIONS[0];
 let charts = {};
 
@@ -833,8 +823,6 @@ async function loadRegion(code){
   const data = {
     cartouches:{ stockInitial:seed.stockInitial, conso:seed.conso, entrees:seed.entrees.map(x=>({...x,id:uid()})), sorties:seed.sorties.map(x=>({...x,id:uid()})) },
     pistolets: [],
-    responsableSite: "",
-    directeurRegional: "",
     responsableHSE: "",
     lastUpdate: null
   };
@@ -953,16 +941,6 @@ regionSelect.addEventListener('change', ()=>{
   currentRegion = regionSelect.value;
   renderRegionPage();
 });
-document.getElementById('responsableSite').addEventListener('change', async (e)=>{
-  STATE[currentRegion].responsableSite = e.target.value;
-  await saveRegion(currentRegion);
-  showToast("Responsable du site mis à jour");
-});
-document.getElementById('directeurRegional').addEventListener('change', async (e)=>{
-  STATE[currentRegion].directeurRegional = e.target.value;
-  await saveRegion(currentRegion);
-  showToast("Directeur régional mis à jour");
-});
 document.getElementById('responsableHSE').addEventListener('change', async (e)=>{
   STATE[currentRegion].responsableHSE = e.target.value;
   await saveRegion(currentRegion);
@@ -971,8 +949,6 @@ document.getElementById('responsableHSE').addEventListener('change', async (e)=>
 
 function renderRegionPage(){
   const data = STATE[currentRegion];
-  document.getElementById('responsableSite').value = data.responsableSite || "";
-  document.getElementById('directeurRegional').value = data.directeurRegional || "";
   document.getElementById('responsableHSE').value = data.responsableHSE || "";
   document.getElementById('consoInput').value = data.cartouches.conso;
   const c = computeCart(data.cartouches);
@@ -1065,8 +1041,6 @@ function renderPistoletTable(){
       <td class="mono">${p.serie}</td>
       <td>${p.modele||'—'}</td>
       <td><span class="chip ${etatClass[p.etat]}">${etatLabel[p.etat]}</span></td>
-      <td class="mono">${p.dernier||'—'}</td>
-      <td class="mono">${p.prochain||'—'}</td>
       <td>${p.resp||'—'}</td>
       <td>${p.obs||'—'}</td>
       <td><button class="btn danger small" data-id="${p.id}">Retirer</button></td>
@@ -1086,8 +1060,7 @@ document.getElementById('addPistolet').addEventListener('click', async ()=>{
   if(!serie){ showToast("Le n° de série est requis"); return; }
   const payload = {
     serie, modele:document.getElementById('pModele').value,
-    etat:document.getElementById('pEtat').value, dernier:document.getElementById('pDernier').value,
-    prochain:document.getElementById('pProchain').value, resp:document.getElementById('pResp').value,
+    etat:document.getElementById('pEtat').value, resp:document.getElementById('pResp').value,
     obs:document.getElementById('pObs').value
   };
   const list = STATE[currentRegion].pistolets;
@@ -1100,7 +1073,7 @@ document.getElementById('addPistolet').addEventListener('click', async ()=>{
     showToast("Pistolet ajouté au parc");
   }
   await saveRegion(currentRegion);
-  ['pSerie','pModele','pDernier','pProchain','pResp','pObs'].forEach(id=>document.getElementById(id).value='');
+  ['pSerie','pModele','pResp','pObs'].forEach(id=>document.getElementById(id).value='');
   renderPistoletTable();
 });
 
@@ -1298,7 +1271,7 @@ function allComputed(){
     const pistoOk = pistos.filter(p=>p.etat==='fonctionnel').length;
     const pistoKo = pistos.filter(p=>p.etat==='panne').length;
     const pistoMaint = pistos.filter(p=>p.etat==='maintenance').length;
-    return {code, ...c, pistoTotal:pistos.length, pistoOk, pistoKo, pistoMaint, responsable:d.responsableSite, lastUpdate:d.lastUpdate};
+    return {code, ...c, pistoTotal:pistos.length, pistoOk, pistoKo, pistoMaint, responsable:d.responsableHSE, lastUpdate:d.lastUpdate};
   });
 }
 
@@ -1549,12 +1522,6 @@ function renderDashboard(){
     if(r.statut==='critique') alerts.push({who:r.code, desc:`Stock cartouches critique — couverture ${r.couverture.toFixed(1)} mois`});
     if(r.statut==='faible') alerts.push({who:r.code, desc:`Stock cartouches faible — couverture ${r.couverture.toFixed(1)} mois`});
     if(r.pistoKo>0) alerts.push({who:r.code, desc:`${r.pistoKo} pistolet(s) en panne`});
-    STATE[r.code].pistolets.forEach(p=>{
-      if(p.prochain){
-        const days = (new Date(p.prochain) - new Date())/86400000;
-        if(days < 30) alerts.push({who:r.code, desc:`Contrôle du pistolet ${p.serie} ${days<0?'dépassé':'à prévoir sous 30 jours'}`});
-      }
-    });
   });
   document.getElementById('alertCount').textContent = alerts.length + ' alerte(s)';
   const al = document.getElementById('alertList');
@@ -1637,11 +1604,9 @@ function renderPistoGlobal(){
       <td class="mono">${p.serie}</td>
       <td>${p.modele||'—'}</td>
       <td><span class="chip ${etatClass[p.etat]}">${etatLabel[p.etat]}</span></td>
-      <td class="mono">${p.dernier||'—'}</td>
-      <td class="mono">${p.prochain||'—'}</td>
       <td>${p.resp||'—'}</td>
       <td>${p.obs||'—'}</td>
-    </tr>`).join('') : `<tr><td colspan="8" style="text-align:center;color:var(--text-dim);padding:24px;">Aucun pistolet enregistré pour l'instant. Ajoutez-en depuis l'espace région.</td></tr>`;
+    </tr>`).join('') : `<tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:24px;">Aucun pistolet enregistré pour l'instant. Ajoutez-en depuis l'espace région.</td></tr>`;
 }
 
 /* ============ REFERENCES ============ */

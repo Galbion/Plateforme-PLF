@@ -156,7 +156,6 @@ body{
 .chip.moyen{background:rgba(232,197,71,0.14);color:var(--status-moyen);}
 .chip.suffisant{background:rgba(61,174,115,0.14);color:var(--status-suffisant);}
 .chip.fonctionnel{background:rgba(61,174,115,0.14);color:var(--status-suffisant);}
-.chip.panne{background:rgba(229,72,77,0.14);color:var(--status-critique);}
 .chip.maintenance{background:rgba(232,197,71,0.14);color:var(--status-moyen);}
 .chip.reforme{background:rgba(154,164,178,0.14);color:var(--text-mid);}
 
@@ -268,6 +267,19 @@ canvas{max-height:230px;}
 .file-drop:hover{border-color:var(--accent-flare);}
 .file-drop-label{font-size:12.5px;color:var(--text-mid);}
 .file-drop-name{font-size:12.5px;color:var(--accent-flare);font-weight:600;margin-top:6px;word-break:break-all;}
+.access-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;}
+.access-check{display:flex;align-items:center;gap:9px;padding:9px 11px;background:var(--bg-panel-raised);border:1px solid var(--line);border-radius:8px;font-size:12.5px;color:var(--text-hi);cursor:pointer;user-select:none;}
+.access-check:hover{border-color:var(--accent-flare);}
+.access-check input{width:15px;height:15px;accent-color:var(--accent-flare);cursor:pointer;flex-shrink:0;}
+.access-tags{display:flex;flex-wrap:wrap;gap:6px;}
+.access-tag{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:600;background:rgba(255,107,26,0.12);color:var(--accent-flare);white-space:nowrap;}
+.access-tag.none{background:var(--bg-panel-raised);color:var(--text-dim);}
+.person-item{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:14px 16px;background:var(--bg-panel-raised);border:1px solid var(--line);border-radius:9px;margin-bottom:10px;}
+.person-item-main{display:flex;flex-direction:column;gap:7px;flex:1;min-width:0;}
+.person-item-title{font-size:13.5px;font-weight:600;color:var(--text-hi);}
+.person-item-sub{font-size:11.5px;color:var(--text-mid);}
+.person-item-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:11px;color:var(--text-dim);}
+.person-item-actions{display:flex;gap:8px;flex-shrink:0;}
 </style>
 </head>
 <body>
@@ -299,6 +311,8 @@ canvas{max-height:230px;}
       <div class="nav-item" data-page="pistolets"><span class="nav-dot"></span>Pistolets — vue globale</div>
       <div class="nav-label">Documentation</div>
       <div class="nav-item" data-page="references"><span class="nav-dot"></span>Références réglementaires &amp; internes</div>
+      <div class="nav-label">Administration</div>
+      <div class="nav-item" data-page="admin"><span class="nav-dot"></span>Accès &amp; utilisateurs</div>
     </div>
     <div class="sidebar-foot">
       <div class="clock" id="clock">--</div>
@@ -397,7 +411,7 @@ canvas{max-height:230px;}
                   <th data-k="statut">Statut</th>
                   <th data-k="pisto" class="num">Pistolets</th>
                   <th data-k="pistoOk" class="num">Fonctionnels</th>
-                  <th data-k="pistoKo" class="num">En panne</th>
+                  <th data-k="pistoKo" class="num">En maintenance</th>
                   <th data-k="maj">Dernière MAJ</th>
                 </tr>
               </thead>
@@ -485,6 +499,14 @@ canvas{max-height:230px;}
                 <div class="field"><label>Fournisseur / Provenance</label><input type="text" id="eProv" placeholder="Ex: Dépôt central"></div>
                 <div class="field"><label>Responsable</label><input type="text" id="eResp" placeholder="Nom et prénom"></div>
                 <div class="field" style="grid-column:1/-1;"><label>Observations</label><input type="text" id="eObs"></div>
+                <div class="field" style="grid-column:1/-1;">
+                  <label>Document justificatif (preuve)</label>
+                  <div class="file-drop" id="eFileDrop">
+                    <div class="file-drop-label">Cliquez pour choisir un fichier (PDF, Word, image...) — 4 Mo max</div>
+                    <div class="file-drop-name" id="eFileName"></div>
+                  </div>
+                  <input type="file" id="eFileInput" style="display:none;">
+                </div>
               </div>
               <div class="field-hint">Si la référence saisie correspond à une entrée existante, celle-ci sera mise à jour au lieu d'être dupliquée.</div>
               <div style="margin-top:14px;"><button class="btn entree" id="addEntree">Enregistrer l'entrée</button></div>
@@ -500,6 +522,14 @@ canvas{max-height:230px;}
                 <div class="field"><label>Destinataire / Motif</label><input type="text" id="sDest" placeholder="Ex: Exercice sécurité"></div>
                 <div class="field"><label>Responsable</label><input type="text" id="sResp" placeholder="Nom et prénom"></div>
                 <div class="field" style="grid-column:1/-1;"><label>Observations</label><input type="text" id="sObs"></div>
+                <div class="field" style="grid-column:1/-1;">
+                  <label>Document justificatif (preuve)</label>
+                  <div class="file-drop" id="sFileDrop">
+                    <div class="file-drop-label">Cliquez pour choisir un fichier (PDF, Word, image...) — 4 Mo max</div>
+                    <div class="file-drop-name" id="sFileName"></div>
+                  </div>
+                  <input type="file" id="sFileInput" style="display:none;">
+                </div>
               </div>
               <div class="field-hint">Si la référence saisie correspond à une sortie existante, celle-ci sera mise à jour au lieu d'être dupliquée.</div>
               <div style="margin-top:14px;"><button class="btn sortie" id="addSortie">Enregistrer la sortie</button></div>
@@ -510,7 +540,7 @@ canvas{max-height:230px;}
             <div class="panel-head"><h2>Historique du site</h2></div>
             <div style="overflow-x:auto;">
               <table>
-                <thead><tr><th>Date</th><th>Mouvement</th><th class="num">Quantité (cartouches)</th><th>Référence</th><th>Provenance / Destinataire</th><th>Responsable</th><th>Observations</th></tr></thead>
+                <thead><tr><th>Date</th><th>Mouvement</th><th class="num">Quantité (cartouches)</th><th>Référence</th><th>Provenance / Destinataire</th><th>Responsable</th><th>Observations</th><th>Justificatif</th></tr></thead>
                 <tbody id="historyBody"></tbody>
               </table>
             </div>
@@ -527,7 +557,6 @@ canvas{max-height:230px;}
                 <select id="pEtat">
                   <option value="fonctionnel">Fonctionnel</option>
                   <option value="maintenance">En maintenance</option>
-                  <option value="panne">En panne</option>
                   <option value="reforme">Obsolète</option>
                 </select>
               </div>
@@ -540,6 +569,7 @@ canvas{max-height:230px;}
 
           <div class="panel">
             <div class="panel-head"><h2>Parc de pistolets du site</h2><div class="hint" id="pistoCountHint"></div></div>
+            <div class="field-hint" id="pistoImportNote" style="display:none;margin-bottom:12px;"></div>
             <div style="overflow-x:auto;">
               <table>
                 <thead><tr><th>N° Série</th><th>Modèle</th><th>État</th><th>Responsable</th><th>Observations</th><th></th></tr></thead>
@@ -590,6 +620,14 @@ canvas{max-height:230px;}
                 <div class="field"><label>N° de décharge</label><input type="text" id="tcRef" placeholder="Ex: BR-2026-014"></div>
                 <div class="field"><label>Responsable</label><input type="text" id="tcResp" placeholder="Nom et prénom"></div>
                 <div class="field" style="grid-column:1/-1;"><label>Observations</label><input type="text" id="tcObs"></div>
+                <div class="field" style="grid-column:1/-1;">
+                  <label>Document justificatif (preuve)</label>
+                  <div class="file-drop" id="tcFileDrop">
+                    <div class="file-drop-label">Cliquez pour choisir un fichier (PDF, Word, image...) — 4 Mo max</div>
+                    <div class="file-drop-name" id="tcFileName"></div>
+                  </div>
+                  <input type="file" id="tcFileInput" style="display:none;">
+                </div>
               </div>
               <div class="field-hint">Si la référence saisie correspond à une réception existante, celle-ci sera mise à jour au lieu d'être dupliquée.</div>
               <div style="margin-top:14px;"><button class="btn entree" id="addTransitCartEntree">Enregistrer la réception</button></div>
@@ -605,6 +643,14 @@ canvas{max-height:230px;}
                 <div class="field"><label>N° de décharge</label><input type="text" id="tcExpRef" placeholder="Ex: BS-2026-007"></div>
                 <div class="field"><label>Responsable</label><input type="text" id="tcExpResp" placeholder="Nom et prénom"></div>
                 <div class="field" style="grid-column:1/-1;"><label>Observations</label><input type="text" id="tcExpObs"></div>
+                <div class="field" style="grid-column:1/-1;">
+                  <label>Document justificatif (preuve)</label>
+                  <div class="file-drop" id="tcExpFileDrop">
+                    <div class="file-drop-label">Cliquez pour choisir un fichier (PDF, Word, image...) — 4 Mo max</div>
+                    <div class="file-drop-name" id="tcExpFileName"></div>
+                  </div>
+                  <input type="file" id="tcExpFileInput" style="display:none;">
+                </div>
               </div>
               <div class="field-hint">Si la référence saisie correspond à une expédition existante, celle-ci sera mise à jour au lieu d'être dupliquée.</div>
               <div style="margin-top:14px;"><button class="btn sortie" id="addTransitCartSortie">Enregistrer l'expédition</button></div>
@@ -615,7 +661,7 @@ canvas{max-height:230px;}
             <div class="panel-head"><h2>Historique du point de transit — Cartouches</h2></div>
             <div style="overflow-x:auto;">
               <table>
-                <thead><tr><th>Date</th><th>Mouvement</th><th class="num">Quantité (cartouches)</th><th>Référence</th><th>Fournisseur / Région</th><th>Responsable</th><th>Observations</th></tr></thead>
+                <thead><tr><th>Date</th><th>Mouvement</th><th class="num">Quantité (cartouches)</th><th>Référence</th><th>Fournisseur / Région</th><th>Responsable</th><th>Observations</th><th>Justificatif</th></tr></thead>
                 <tbody id="transitCartHistoryBody"></tbody>
               </table>
             </div>
@@ -717,6 +763,18 @@ canvas{max-height:230px;}
         </div>
       </div>
 
+      <!-- ============ ADMINISTRATION — ACCES & UTILISATEURS ============ -->
+      <div class="page" id="page-admin">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Gestion des accès utilisateurs</h2>
+            <button class="btn" id="openPersonModal">+ Ajouter une personne</button>
+          </div>
+          <div class="hint" style="margin-bottom:14px;">Définissez, pour chaque personne, les fenêtres de la plateforme auxquelles elle a accès, et joignez si besoin son fichier justificatif (habilitation, décision, autorisation...).</div>
+          <div class="person-list" id="personList"></div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -765,6 +823,43 @@ canvas{max-height:230px;}
   </div>
 </div>
 
+<!-- ============ MODAL — AJOUTER / MODIFIER UNE PERSONNE ============ -->
+<div class="modal-overlay" id="personModalOverlay">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2 id="personModalTitle">Ajouter une personne</h2>
+      <button class="modal-close" id="closePersonModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Nom et prénom *</label>
+        <input type="text" id="personName" placeholder="Ex : Karim Belhadj">
+      </div>
+      <div class="field">
+        <label>Fonction / Site</label>
+        <input type="text" id="personRole" placeholder="Ex : Responsable HSE — HMD">
+      </div>
+      <div class="field">
+        <label>Fenêtres accessibles</label>
+        <div class="access-grid" id="personAccessGrid"></div>
+      </div>
+      <div class="field">
+        <label>Fichier justificatif</label>
+        <div class="file-drop" id="personFileDrop">
+          <div class="file-drop-label">Cliquez pour choisir un fichier (PDF, Word, image...) — 4 Mo max</div>
+          <div class="file-drop-name" id="personFileName"></div>
+        </div>
+        <input type="file" id="personFileInput" style="display:none;">
+        <div class="field-hint">Le justificatif est enregistré avec la personne et visible par tous les utilisateurs de la plateforme.</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn secondary" id="cancelPersonModal">Annuler</button>
+      <button class="btn" id="savePersonBtn">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -787,6 +882,26 @@ const SEED = {
   INAS:  {stockInitial:1000, conso:20,  entrees:[], sorties:[]},
 };
 
+// Données importées du classeur "ClasPATseur1" (inventaire des pistolets allume torche par région).
+// Utilisées uniquement pour amorcer le parc de pistolets la toute première fois qu'un site est ouvert
+// (si aucune donnée n'est déjà enregistrée dans le stockage du site). Les n° de série n'existaient pas
+// dans le fichier source : ils sont générés automatiquement au format PAT-<CODE>-XX.
+const PISTO_IMPORT = {
+  HRM:    {count:22, note:"17 en stock"},
+  HMD:    {count:19, note:"Commande de 100 en cours"},
+  HBK:    {count:11, note:""},
+  INAS:   {count:8,  note:""},
+  ADRAR:  {count:7,  note:"Besoin de 6 en plus"},
+  ONR:    {count:7,  note:""},
+  STAH:   {count:6,  note:""},
+  RNS:    {count:6,  note:""},
+  TFT:    {count:4,  note:""},
+  REB:    {count:4,  note:"Problème d'autorisation et dossier"},
+  GTL:    {count:3,  note:""},
+  OHANET: {count:3,  note:"Besoin de 3 en plus"},
+  HAMRA:  {count:1,  note:"Besoin de 1 en plus"},
+};
+
 let STATE = {};   // { CODE: { cartouches:{stockInitial,conso,entrees,sorties}, pistolets:[...], responsableHSE, lastUpdate } }
 let currentRegion = REGIONS[0];
 let charts = {};
@@ -800,15 +915,19 @@ function statusOf(couverture){
   return "suffisant";
 }
 const statusLabel = {critique:"Critique (< 1 mois)",faible:"Faible (1-3 mois)",moyen:"Moyen (3-6 mois)",suffisant:"Suffisant (> 6 mois)"};
-const etatLabel = {fonctionnel:"Fonctionnel",panne:"En panne",maintenance:"En maintenance",reforme:"Obsolète"};
-const etatClass = {fonctionnel:"fonctionnel",panne:"panne",maintenance:"maintenance",reforme:"reforme"};
+const etatLabel = {fonctionnel:"Fonctionnel",maintenance:"En maintenance",reforme:"Obsolète"};
+const etatClass = {fonctionnel:"fonctionnel",maintenance:"maintenance",reforme:"reforme"};
+// Priorité des alertes actives (1 = plus urgent). La couleur/mention affichée reprend le code statut habituel (chip.critique / .faible / .maintenance).
+const alertPriority = {critique:1, faible:2, maintenance:3};
+const alertStatutLabel = {critique:"Critique", faible:"Faible", maintenance:"Maintenance"};
+function normEtat(e){ return e==='panne' ? 'maintenance' : e; }
 
 function computeCart(c){
   const entreesQty = c.entrees.reduce((s,e)=>s+Number(e.qty||0),0);
   const sortiesQty = c.sorties.reduce((s,e)=>s+Number(e.qty||0),0);
   const stock = c.stockInitial + entreesQty - sortiesQty;
   const couverture = c.conso > 0 ? stock / c.conso : (stock>0?999:0);
-  return {stock, entreesQty, sortiesQty, couverture, statut: statusOf(couverture)};
+  return {stock, conso:c.conso, entreesQty, sortiesQty, couverture, statut: statusOf(couverture)};
 }
 
 async function loadRegion(code){
@@ -816,13 +935,24 @@ async function loadRegion(code){
     const res = await window.storage.get('region-data:'+code, true);
     if(res && res.value){
       STATE[code] = JSON.parse(res.value);
+      (STATE[code].pistolets||[]).forEach(p=>{ p.etat = normEtat(p.etat); });
       return STATE[code];
     }
   }catch(e){ /* not found, fall through to seed */ }
   const seed = SEED[code];
+  const pistoSeed = PISTO_IMPORT[code];
+  const pistolets = pistoSeed ? Array.from({length:pistoSeed.count}, (_, i)=>({
+    id: uid(),
+    serie: 'PAT-'+code+'-'+String(i+1).padStart(2,'0'),
+    modele: '',
+    etat: 'fonctionnel',
+    resp: '',
+    obs: ''
+  })) : [];
   const data = {
     cartouches:{ stockInitial:seed.stockInitial, conso:seed.conso, entrees:seed.entrees.map(x=>({...x,id:uid()})), sorties:seed.sorties.map(x=>({...x,id:uid()})) },
-    pistolets: [],
+    pistolets,
+    pistoImportNote: (pistoSeed && pistoSeed.note) ? pistoSeed.note : "",
     responsableHSE: "",
     lastUpdate: null
   };
@@ -900,7 +1030,8 @@ document.querySelectorAll('.nav-item').forEach(item=>{
       transit:["Point de Transit — HMD Transite","Réception depuis les fournisseurs et expédition vers les régions"],
       cartouches:["Registre global — Cartouches","Vue consolidée de tous les sites"],
       pistolets:["Registre global — Pistolets","Vue consolidée du parc de pistolets allume torche (PAT)"],
-      references:["Références réglementaires & internes","Textes réglementaires, procédures et documents internes liés aux PAT"]
+      references:["Références réglementaires & internes","Textes réglementaires, procédures et documents internes liés aux PAT"],
+      admin:["Administration — Accès & utilisateurs","Gérez les personnes, leurs accès aux fenêtres de la plateforme et leurs justificatifs"]
     };
     document.getElementById('pageTitle').textContent = titles[page][0];
     document.getElementById('pageSub').textContent = titles[page][1];
@@ -909,6 +1040,7 @@ document.querySelectorAll('.nav-item').forEach(item=>{
     if(page==='cartouches') renderCartGlobal();
     if(page==='pistolets') renderPistoGlobal();
     if(page==='references') renderReferences();
+    if(page==='admin') renderPersons();
   });
 });
 
@@ -972,7 +1104,8 @@ function renderRegionPage(){
       <td>${r.prov||r.dest||'—'}</td>
       <td>${r.resp||'—'}</td>
       <td>${r.obs||'—'}</td>
-    </tr>`).join('') : `<tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:24px;">Aucun mouvement enregistré pour ce site.</td></tr>`;
+      <td>${movementFileHtml(r.file)}</td>
+    </tr>`).join('') : `<tr><td colspan="8" style="text-align:center;color:var(--text-dim);padding:24px;">Aucun mouvement enregistré pour ce site.</td></tr>`;
 
   renderPistoletTable();
 }
@@ -989,13 +1122,14 @@ document.getElementById('addEntree').addEventListener('click', async ()=>{
   const qty = Number(document.getElementById('eQty').value);
   if(!qty || qty<=0){ showToast("Indiquez une quantité valide (en cartouches)"); return; }
   const ref = document.getElementById('eRef').value.trim();
+  const entrees = STATE[currentRegion].cartouches.entrees;
+  const existing = ref ? entrees.find(e=>(e.ref||'').trim().toLowerCase()===ref.toLowerCase()) : null;
   const payload = {
     date:document.getElementById('eDate').value || new Date().toISOString().slice(0,10),
     qty, ref, prov:document.getElementById('eProv').value,
-    resp:document.getElementById('eResp').value, obs:document.getElementById('eObs').value
+    resp:document.getElementById('eResp').value, obs:document.getElementById('eObs').value,
+    file: pendingFiles.eFileInput || (existing ? existing.file : null) || null
   };
-  const entrees = STATE[currentRegion].cartouches.entrees;
-  const existing = ref ? entrees.find(e=>(e.ref||'').trim().toLowerCase()===ref.toLowerCase()) : null;
   if(existing){
     Object.assign(existing, payload);
     showToast("Entrée mise à jour (référence existante : "+ref+")");
@@ -1005,6 +1139,7 @@ document.getElementById('addEntree').addEventListener('click', async ()=>{
   }
   await saveRegion(currentRegion);
   ['eDate','eQty','eRef','eProv','eResp','eObs'].forEach(id=>document.getElementById(id).value='');
+  resetMovementFileField('eFileInput','eFileName');
   renderRegionPage();
 });
 
@@ -1012,13 +1147,14 @@ document.getElementById('addSortie').addEventListener('click', async ()=>{
   const qty = Number(document.getElementById('sQty').value);
   if(!qty || qty<=0){ showToast("Indiquez une quantité valide (en cartouches)"); return; }
   const ref = document.getElementById('sRef').value.trim();
+  const sorties = STATE[currentRegion].cartouches.sorties;
+  const existing = ref ? sorties.find(e=>(e.ref||'').trim().toLowerCase()===ref.toLowerCase()) : null;
   const payload = {
     date:document.getElementById('sDate').value || new Date().toISOString().slice(0,10),
     qty, ref, dest:document.getElementById('sDest').value,
-    resp:document.getElementById('sResp').value, obs:document.getElementById('sObs').value
+    resp:document.getElementById('sResp').value, obs:document.getElementById('sObs').value,
+    file: pendingFiles.sFileInput || (existing ? existing.file : null) || null
   };
-  const sorties = STATE[currentRegion].cartouches.sorties;
-  const existing = ref ? sorties.find(e=>(e.ref||'').trim().toLowerCase()===ref.toLowerCase()) : null;
   if(existing){
     Object.assign(existing, payload);
     showToast("Sortie mise à jour (référence existante : "+ref+")");
@@ -1028,6 +1164,7 @@ document.getElementById('addSortie').addEventListener('click', async ()=>{
   }
   await saveRegion(currentRegion);
   ['sDate','sQty','sRef','sDest','sResp','sObs'].forEach(id=>document.getElementById(id).value='');
+  resetMovementFileField('sFileInput','sFileName');
   renderRegionPage();
 });
 
@@ -1036,6 +1173,15 @@ function renderPistoletTable(){
   const body = document.getElementById('pistoletBody');
   document.getElementById('pistoCountHint').textContent = list.length + ' pistolet(s) au total';
   document.getElementById('pistoEmpty').style.display = list.length ? 'none':'block';
+  const noteEl = document.getElementById('pistoImportNote');
+  const note = STATE[currentRegion].pistoImportNote;
+  if(note){
+    noteEl.style.display = 'block';
+    noteEl.textContent = '📋 Commentaire (import inventaire) : ' + note;
+  }else{
+    noteEl.style.display = 'none';
+    noteEl.textContent = '';
+  }
   body.innerHTML = list.map(p=>`
     <tr>
       <td class="mono">${p.serie}</td>
@@ -1121,7 +1267,8 @@ function renderTransitPage(){
       <td>${r.fournisseur||r.region||'—'}</td>
       <td>${r.resp||'—'}</td>
       <td>${r.obs||'—'}</td>
-    </tr>`).join('') : `<tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:24px;">Aucun mouvement enregistré pour le point de transit.</td></tr>`;
+      <td>${movementFileHtml(r.file)}</td>
+    </tr>`).join('') : `<tr><td colspan="8" style="text-align:center;color:var(--text-dim);padding:24px;">Aucun mouvement enregistré pour le point de transit.</td></tr>`;
 
   const pRows = [];
   TRANSIT.pistolets.entreesFournisseurs.forEach(e=>pRows.push({...e,type:'Réception'}));
@@ -1144,13 +1291,14 @@ document.getElementById('addTransitCartEntree').addEventListener('click', async 
   const qty = Number(document.getElementById('tcQty').value);
   if(!qty || qty<=0){ showToast("Indiquez une quantité valide (en cartouches)"); return; }
   const ref = document.getElementById('tcRef').value.trim();
+  const entrees = TRANSIT.cartouches.entreesFournisseurs;
+  const existing = ref ? entrees.find(e=>(e.ref||'').trim().toLowerCase()===ref.toLowerCase()) : null;
   const payload = {
     date:document.getElementById('tcDate').value || new Date().toISOString().slice(0,10),
     qty, ref, fournisseur:document.getElementById('tcFournisseur').value,
-    resp:document.getElementById('tcResp').value, obs:document.getElementById('tcObs').value
+    resp:document.getElementById('tcResp').value, obs:document.getElementById('tcObs').value,
+    file: pendingFiles.tcFileInput || (existing ? existing.file : null) || null
   };
-  const entrees = TRANSIT.cartouches.entreesFournisseurs;
-  const existing = ref ? entrees.find(e=>(e.ref||'').trim().toLowerCase()===ref.toLowerCase()) : null;
   if(existing){
     Object.assign(existing, payload);
     showToast("Réception mise à jour (référence existante : "+ref+")");
@@ -1160,6 +1308,7 @@ document.getElementById('addTransitCartEntree').addEventListener('click', async 
   }
   await saveTransit();
   ['tcDate','tcQty','tcFournisseur','tcRef','tcResp','tcObs'].forEach(id=>document.getElementById(id).value='');
+  resetMovementFileField('tcFileInput','tcFileName');
   renderTransitPage();
 });
 
@@ -1167,13 +1316,14 @@ document.getElementById('addTransitCartSortie').addEventListener('click', async 
   const qty = Number(document.getElementById('tcExpQty').value);
   if(!qty || qty<=0){ showToast("Indiquez une quantité valide (en cartouches)"); return; }
   const ref = document.getElementById('tcExpRef').value.trim();
+  const expeditions = TRANSIT.cartouches.expeditions;
+  const existing = ref ? expeditions.find(e=>(e.ref||'').trim().toLowerCase()===ref.toLowerCase()) : null;
   const payload = {
     date:document.getElementById('tcExpDate').value || new Date().toISOString().slice(0,10),
     qty, ref, region:document.getElementById('tcExpRegion').value,
-    resp:document.getElementById('tcExpResp').value, obs:document.getElementById('tcExpObs').value
+    resp:document.getElementById('tcExpResp').value, obs:document.getElementById('tcExpObs').value,
+    file: pendingFiles.tcExpFileInput || (existing ? existing.file : null) || null
   };
-  const expeditions = TRANSIT.cartouches.expeditions;
-  const existing = ref ? expeditions.find(e=>(e.ref||'').trim().toLowerCase()===ref.toLowerCase()) : null;
   if(existing){
     Object.assign(existing, payload);
     showToast("Expédition mise à jour (référence existante : "+ref+")");
@@ -1183,6 +1333,7 @@ document.getElementById('addTransitCartSortie').addEventListener('click', async 
   }
   await saveTransit();
   ['tcExpDate','tcExpQty','tcExpRef','tcExpResp','tcExpObs'].forEach(id=>document.getElementById(id).value='');
+  resetMovementFileField('tcExpFileInput','tcExpFileName');
   renderTransitPage();
 });
 
@@ -1269,9 +1420,8 @@ function allComputed(){
     const c = computeCart(d.cartouches);
     const pistos = d.pistolets;
     const pistoOk = pistos.filter(p=>p.etat==='fonctionnel').length;
-    const pistoKo = pistos.filter(p=>p.etat==='panne').length;
-    const pistoMaint = pistos.filter(p=>p.etat==='maintenance').length;
-    return {code, ...c, pistoTotal:pistos.length, pistoOk, pistoKo, pistoMaint, responsable:d.responsableHSE, lastUpdate:d.lastUpdate};
+    const pistoKo = pistos.filter(p=>p.etat==='maintenance').length;
+    return {code, ...c, pistoTotal:pistos.length, pistoOk, pistoKo, responsable:d.responsableHSE, lastUpdate:d.lastUpdate};
   });
 }
 
@@ -1369,10 +1519,10 @@ function renderDashboard(){
   // pistolets doughnut
   const ctx2 = document.getElementById('chartPistolets');
   if(charts.pisto) charts.pisto.destroy();
-  const pistoCounts = { fonctionnel:rows.reduce((s,r)=>s+r.pistoOk,0), maintenance:rows.reduce((s,r)=>s+r.pistoMaint,0), panne:pistoKo, reforme: pistoTotal - pistoOk - pistoKo - rows.reduce((s,r)=>s+r.pistoMaint,0) };
+  const pistoCounts = { fonctionnel:pistoOk, maintenance:pistoKo, reforme: pistoTotal - pistoOk - pistoKo };
   charts.pisto = new Chart(ctx2, {
     type:'doughnut',
-    data:{ labels:['Fonctionnel','Maintenance','En panne','Obsolète'], datasets:[{ data:[pistoCounts.fonctionnel,pistoCounts.maintenance,pistoCounts.panne,Math.max(pistoCounts.reforme,0)], backgroundColor:['#3DAE73','#E8C547','#E5484D','#5B6472'], borderWidth:0 }]},
+    data:{ labels:['Fonctionnel','En maintenance','Obsolète'], datasets:[{ data:[pistoCounts.fonctionnel,pistoCounts.maintenance,Math.max(pistoCounts.reforme,0)], backgroundColor:['#3DAE73','#E8C547','#5B6472'], borderWidth:0 }]},
     options:{
       plugins:{
         legend:{position:'bottom',labels:{color:'#5B6472',font:{size:11},padding:14}},
@@ -1519,14 +1669,15 @@ function renderDashboard(){
   // alerts
   const alerts = [];
   rows.forEach(r=>{
-    if(r.statut==='critique') alerts.push({who:r.code, desc:`Stock cartouches critique — couverture ${r.couverture.toFixed(1)} mois`});
-    if(r.statut==='faible') alerts.push({who:r.code, desc:`Stock cartouches faible — couverture ${r.couverture.toFixed(1)} mois`});
-    if(r.pistoKo>0) alerts.push({who:r.code, desc:`${r.pistoKo} pistolet(s) en panne`});
+    if(r.statut==='critique') alerts.push({who:r.code, desc:`Stock cartouches critique — couverture ${r.couverture.toFixed(1)} mois`, statut:'critique'});
+    if(r.statut==='faible') alerts.push({who:r.code, desc:`Stock cartouches faible — couverture ${r.couverture.toFixed(1)} mois`, statut:'faible'});
+    if(r.pistoKo>0) alerts.push({who:r.code, desc:`${r.pistoKo} pistolet(s) en maintenance`, statut:'maintenance'});
   });
+  alerts.sort((a,b)=> alertPriority[a.statut]-alertPriority[b.statut]);
   document.getElementById('alertCount').textContent = alerts.length + ' alerte(s)';
   const al = document.getElementById('alertList');
   al.innerHTML = alerts.length ? alerts.slice(0,10).map(a=>`
-    <div class="alert-item"><div><div class="who">${a.who}</div><div class="desc">${a.desc}</div></div><span class="chip critique">Action requise</span></div>
+    <div class="alert-item"><div><div class="who">${a.who}</div><div class="desc">${a.desc}</div></div><span class="chip ${a.statut}">${alertStatutLabel[a.statut]}</span></div>
   `).join('') : `<div class="empty-state"><div class="big">Aucune alerte active</div><div>Tous les sites sont dans les seuils attendus.</div></div>`;
 
   // master table
@@ -1537,6 +1688,44 @@ function renderDashboard(){
 }
 
 let sortState = {k:'region', dir:1};
+/* ---- Fichiers justificatifs (entrées/sorties) ---- */
+let pendingFiles = {}; // { inputId: {name,type,size,dataUrl} }
+function setupMovementFileField(dropId, inputId, nameId){
+  document.getElementById(dropId).addEventListener('click', ()=>{
+    document.getElementById(inputId).click();
+  });
+  document.getElementById(inputId).addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    if(file.size > 4*1024*1024){
+      showToast("Fichier trop volumineux (max 4 Mo)");
+      e.target.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      pendingFiles[inputId] = { name: file.name, type: file.type, size: file.size, dataUrl: reader.result };
+      document.getElementById(nameId).textContent = file.name;
+    };
+    reader.onerror = ()=>{ showToast("Impossible de lire le fichier"); };
+    reader.readAsDataURL(file);
+  });
+}
+function resetMovementFileField(inputId, nameId){
+  pendingFiles[inputId] = null;
+  document.getElementById(inputId).value = '';
+  document.getElementById(nameId).textContent = '';
+}
+function movementFileHtml(file){
+  return file
+    ? `<a class="ref-file-chip" href="${file.dataUrl}" download="${file.name}">⬇ ${escapeHtml(file.name)}</a>`
+    : `<span class="ref-no-file">Aucun fichier</span>`;
+}
+setupMovementFileField('eFileDrop','eFileInput','eFileName');
+setupMovementFileField('sFileDrop','sFileInput','sFileName');
+setupMovementFileField('tcFileDrop','tcFileInput','tcFileName');
+setupMovementFileField('tcExpFileDrop','tcExpFileInput','tcExpFileName');
+
 function renderMasterTable(rows){
   const sorted = [...rows].sort((a,b)=>{
     const map = {region:'code', stock:'stock', conso:'conso', couverture:'couverture', statut:'statut', pisto:'pistoTotal', pistoOk:'pistoOk', pistoKo:'pistoKo', maj:'lastUpdate'};
@@ -1590,13 +1779,11 @@ function renderPistoGlobal(){
   REGIONS.forEach(code=> STATE[code].pistolets.forEach(p=> all.push({code,...p})));
   const total = all.length;
   const ok = all.filter(p=>p.etat==='fonctionnel').length;
-  const panne = all.filter(p=>p.etat==='panne').length;
   const maint = all.filter(p=>p.etat==='maintenance').length;
   document.getElementById('pistoKpiRow').innerHTML = `
     <div class="kpi"><div class="bar" style="background:var(--accent-flare)"></div><div class="val">${total}<span class="unit-suffix">unités</span></div><div class="lbl">Pistolets au total</div></div>
     <div class="kpi"><div class="bar" style="background:var(--status-suffisant)"></div><div class="val">${ok}<span class="unit-suffix">unités</span></div><div class="lbl">Fonctionnels</div></div>
     <div class="kpi"><div class="bar" style="background:var(--status-moyen)"></div><div class="val">${maint}<span class="unit-suffix">unités</span></div><div class="lbl">En maintenance</div></div>
-    <div class="kpi"><div class="bar" style="background:var(--status-critique)"></div><div class="val">${panne}<span class="unit-suffix">unités</span></div><div class="lbl">En panne</div></div>
   `;
   document.getElementById('pistoGlobalBody').innerHTML = all.length ? all.map(p=>`
     <tr>
@@ -1756,6 +1943,173 @@ document.getElementById('saveRefBtn').addEventListener('click', async ()=>{
   }
 });
 
+/* ============ ADMINISTRATION — ACCES & UTILISATEURS ============ */
+const ACCESS_PAGES = [
+  {key:'dashboard',  label:'Tableau de bord — Direction'},
+  {key:'region',     label:'Saisie — Espace Région'},
+  {key:'transit',    label:'HMD Transite'},
+  {key:'cartouches', label:'Cartouches — vue globale'},
+  {key:'pistolets',  label:'Pistolets — vue globale'},
+  {key:'references', label:'Références réglementaires & internes'},
+  {key:'admin',      label:'Administration — Accès & utilisateurs'}
+];
+
+let PERSONS = [];
+let personPendingFile = null; // {name, type, size, dataUrl}
+let personEditingId = null;
+
+async function loadPersons(){
+  try{
+    const res = await window.storage.get('admin-persons', true);
+    PERSONS = res ? JSON.parse(res.value) : [];
+  }catch(e){
+    PERSONS = [];
+  }
+}
+
+async function savePersons(){
+  try{
+    await window.storage.set('admin-persons', JSON.stringify(PERSONS), true);
+  }catch(e){
+    showToast("Erreur de sauvegarde — réessayez");
+    return false;
+  }
+  return true;
+}
+
+function renderPersons(){
+  const list = document.getElementById('personList');
+  if(!PERSONS.length){
+    list.innerHTML = `<div class="empty-state"><div class="big">Aucune personne enregistrée</div>Ajoutez une personne et définissez les fenêtres auxquelles elle a accès avec le bouton ci-dessus.</div>`;
+    return;
+  }
+  list.innerHTML = PERSONS.slice().sort((a,b)=> new Date(b.dateAdded)-new Date(a.dateAdded)).map(p=>{
+    const access = (p.accessPages||[]);
+    const tagsHtml = access.length
+      ? access.map(k=>{
+          const found = ACCESS_PAGES.find(a=>a.key===k);
+          return `<span class="access-tag">${escapeHtml(found ? found.label : k)}</span>`;
+        }).join('')
+      : `<span class="access-tag none">Aucun accès</span>`;
+    const fileHtml = p.file
+      ? `<a class="ref-file-chip" href="${p.file.dataUrl}" download="${p.file.name}">⬇ ${escapeHtml(p.file.name)}</a>`
+      : `<span class="ref-no-file">Aucun justificatif</span>`;
+    const dateStr = new Date(p.dateAdded).toLocaleDateString('fr-FR', {day:'2-digit',month:'short',year:'numeric'});
+    return `
+    <div class="person-item">
+      <div class="person-item-main">
+        <div class="person-item-title">${escapeHtml(p.name)}</div>
+        ${p.role ? `<div class="person-item-sub">${escapeHtml(p.role)}</div>` : ''}
+        <div class="access-tags">${tagsHtml}</div>
+        <div class="person-item-meta">
+          <span>Ajouté le ${dateStr}</span>
+          ${fileHtml}
+        </div>
+      </div>
+      <div class="person-item-actions">
+        <button class="btn secondary small" data-edit="${p.id}">Modifier</button>
+        <button class="btn danger small" data-del="${p.id}">Supprimer</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('[data-edit]').forEach(btn=>{
+    btn.addEventListener('click', ()=> openPersonModal(btn.dataset.edit));
+  });
+  list.querySelectorAll('[data-del]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      if(!confirm("Supprimer cette personne et retirer ses accès ?")) return;
+      PERSONS = PERSONS.filter(p=>p.id!==btn.dataset.del);
+      const ok = await savePersons();
+      if(ok){ showToast("Personne supprimée"); renderPersons(); }
+    });
+  });
+}
+
+/* ---- Modal ---- */
+const personModalOverlay = document.getElementById('personModalOverlay');
+
+function buildAccessGrid(checkedKeys){
+  const grid = document.getElementById('personAccessGrid');
+  grid.innerHTML = ACCESS_PAGES.map(a=>`
+    <label class="access-check">
+      <input type="checkbox" value="${a.key}" ${checkedKeys.includes(a.key) ? 'checked' : ''}>
+      ${escapeHtml(a.label)}
+    </label>`).join('');
+}
+
+function openPersonModal(id){
+  personEditingId = id || null;
+  const person = id ? PERSONS.find(p=>p.id===id) : null;
+
+  document.getElementById('personModalTitle').textContent = person ? "Modifier une personne" : "Ajouter une personne";
+  document.getElementById('personName').value = person ? person.name : '';
+  document.getElementById('personRole').value = person ? (person.role||'') : '';
+  buildAccessGrid(person ? (person.accessPages||[]) : []);
+  document.getElementById('personFileName').textContent = person && person.file ? person.file.name : '';
+  document.getElementById('personFileInput').value = '';
+  personPendingFile = person ? (person.file || null) : null;
+
+  personModalOverlay.classList.add('show');
+}
+function closePersonModal(){
+  personModalOverlay.classList.remove('show');
+}
+document.getElementById('openPersonModal').addEventListener('click', ()=> openPersonModal(null));
+document.getElementById('closePersonModal').addEventListener('click', closePersonModal);
+document.getElementById('cancelPersonModal').addEventListener('click', closePersonModal);
+personModalOverlay.addEventListener('click', (e)=>{ if(e.target===personModalOverlay) closePersonModal(); });
+
+document.getElementById('personFileDrop').addEventListener('click', ()=>{
+  document.getElementById('personFileInput').click();
+});
+document.getElementById('personFileInput').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  if(file.size > 4*1024*1024){
+    showToast("Fichier trop volumineux (max 4 Mo)");
+    e.target.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    personPendingFile = { name: file.name, type: file.type, size: file.size, dataUrl: reader.result };
+    document.getElementById('personFileName').textContent = file.name;
+  };
+  reader.onerror = ()=>{ showToast("Impossible de lire le fichier"); };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('savePersonBtn').addEventListener('click', async ()=>{
+  const name = document.getElementById('personName').value.trim();
+  if(!name){ showToast("Le nom est obligatoire"); return; }
+  const accessPages = Array.from(document.querySelectorAll('#personAccessGrid input[type=checkbox]:checked')).map(i=>i.value);
+
+  if(personEditingId){
+    const p = PERSONS.find(x=>x.id===personEditingId);
+    p.name = name;
+    p.role = document.getElementById('personRole').value.trim();
+    p.accessPages = accessPages;
+    p.file = personPendingFile;
+  }else{
+    PERSONS.push({
+      id: 'usr_' + Date.now() + '_' + Math.random().toString(36).slice(2,8),
+      name,
+      role: document.getElementById('personRole').value.trim(),
+      accessPages,
+      file: personPendingFile,
+      dateAdded: new Date().toISOString()
+    });
+  }
+
+  const ok = await savePersons();
+  if(ok){
+    showToast(personEditingId ? "Personne mise à jour" : "Personne ajoutée");
+    closePersonModal();
+    renderPersons();
+  }
+});
+
 /* ============ CLOCK ============ */
 function tickClock(){
   document.getElementById('clock').textContent = new Date().toLocaleString('fr-FR', {weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
@@ -1776,11 +2130,13 @@ setInterval(tickClock, 1000*30);
   }
   await loadAll();
   await loadReferences();
+  await loadPersons();
   tickClock();
   if(chartOk) renderDashboard(); else renderDashboardWithoutCharts();
   regionSelect.value = currentRegion;
   renderRegionPage();
   renderReferences();
+  renderPersons();
 })();
 
 function renderDashboardWithoutCharts(){
@@ -1809,14 +2165,15 @@ function renderDashboardWithoutCharts(){
   }).join('');
   const alerts = [];
   rows.forEach(r=>{
-    if(r.statut==='critique') alerts.push({who:r.code, desc:`Stock cartouches critique — couverture ${r.couverture.toFixed(1)} mois`});
-    if(r.statut==='faible') alerts.push({who:r.code, desc:`Stock cartouches faible — couverture ${r.couverture.toFixed(1)} mois`});
-    if(r.pistoKo>0) alerts.push({who:r.code, desc:`${r.pistoKo} pistolet(s) en panne`});
+    if(r.statut==='critique') alerts.push({who:r.code, desc:`Stock cartouches critique — couverture ${r.couverture.toFixed(1)} mois`, statut:'critique'});
+    if(r.statut==='faible') alerts.push({who:r.code, desc:`Stock cartouches faible — couverture ${r.couverture.toFixed(1)} mois`, statut:'faible'});
+    if(r.pistoKo>0) alerts.push({who:r.code, desc:`${r.pistoKo} pistolet(s) en maintenance`, statut:'maintenance'});
   });
+  alerts.sort((a,b)=> alertPriority[a.statut]-alertPriority[b.statut]);
   document.getElementById('alertCount').textContent = alerts.length + ' alerte(s)';
   const al = document.getElementById('alertList');
   al.innerHTML = alerts.length ? alerts.slice(0,10).map(a=>`
-    <div class="alert-item"><div><div class="who">${a.who}</div><div class="desc">${a.desc}</div></div><span class="chip critique">Action requise</span></div>
+    <div class="alert-item"><div><div class="who">${a.who}</div><div class="desc">${a.desc}</div></div><span class="chip ${a.statut}">${alertStatutLabel[a.statut]}</span></div>
   `).join('') : `<div class="empty-state"><div class="big">Aucune alerte active</div><div>Tous les sites sont dans les seuils attendus.</div></div>`;
   renderMasterTable(rows);
   renderTransitDashboardPanel();
